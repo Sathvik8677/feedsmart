@@ -167,27 +167,24 @@ function sendOTP(){
     method:'POST',
     body: formData
   })
-.then(d=>{
-    console.log("Response:", d);  // 🔥 DEBUG
-
+  .then(res => res.json())   // 🔥 FIX HERE
+  .then(d=>{
     showMessage("OTP Sent ✅", "green");
 
-    // 🔥 SHOW OTP ON SCREEN
     if(d.otp){
-        document.getElementById("otpStatus").innerText =
-            "Your OTP is: " + d.otp;
+      document.getElementById("otpStatus").innerText =
+        "Your OTP is: " + d.otp;
     }
 
     btn.innerHTML = "Resend OTP";
     btn.disabled = false;
-})
+  })
   .catch(()=>{
     showMessage("Error ❌", "red");
     btn.innerHTML = "Send OTP";
     btn.disabled = false;
   });
 }
-
 function verifyOTP(){
   let otp = document.getElementById("otp").value;
 
