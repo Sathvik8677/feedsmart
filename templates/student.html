@@ -276,6 +276,69 @@ textarea:focus{border-color:var(--green)}
     white-space: nowrap;
   }
 }
+/* 🔥 PREMIUM CARD */
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* 🔥 BUTTON STYLE */
+.btn {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* 🔥 FADE ANIMATION */
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* 🔥 BOTTOM NAV (MOBILE) */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width:768px){
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+  }
+
+  .bottom-nav button {
+    background: none;
+    border: none;
+    font-size: 20px;
+  }
+
+  body {
+    padding-bottom: 60px; /* space for nav */
+  }
+}
 </style>
 </head>
 <body>
@@ -570,7 +633,7 @@ textarea:focus{border-color:var(--green)}
 
       <!-- ANNOUNCEMENTS -->
       {% if anns %}
-      <div class="card">
+      <div class="card fade-in">
         <div class="card-title">📢 Announcements</div>
         {% for a in anns %}
         <div class="ann {{ a.priority }}">
@@ -583,7 +646,7 @@ textarea:focus{border-color:var(--green)}
       {% endif %}
 
       <!-- TODAY'S MEALS -->
-      <div class="card">
+      <div class="card fade-in">
         <div class="section-hdr">
           <div class="card-title" style="margin:0">🍽 Today's Meals — Opt-In / Out</div>
           <span style="font-size:.78rem;color:var(--muted)">{{ today }}</span>
@@ -629,7 +692,7 @@ textarea:focus{border-color:var(--green)}
       </div>
 
       <!-- TOMORROW PRE-BOOK -->
-      <div class="card">
+      <div class="card fade-in">
         <div class="section-hdr">
           <div class="card-title" style="margin:0">🗓 Tomorrow — Pre-Book Meals</div>
           <span style="font-size:.78rem;color:var(--muted)">{{ tomorrow }}</span>
@@ -664,7 +727,7 @@ textarea:focus{border-color:var(--green)}
     <!-- ═══ WEEKLY TAB ═══ -->
     <!-- ═══ WEEKLY TAB ═══ -->
 <div id="tab-weekly" class="tab-content">
-  <div class="card">
+  <div class="card fade-in">
     <div class="card-title">📅 Weekly Menu</div>
 
     <div class="week-grid">
@@ -701,7 +764,7 @@ textarea:focus{border-color:var(--green)}
     <!-- ═══ QR TAB ═══ -->
     <div id="tab-qr" class="tab-content">
       <div class="g2">
-        <div class="card">
+        <div class="card fade-in">
           <div class="card-title">🎫 My Mess QR Code</div>
           <div class="qr-container">
             <div id="qrcode"></div>
@@ -710,7 +773,7 @@ textarea:focus{border-color:var(--green)}
             <div class="qr-note">Show this QR code to the mess administrator at meal time. Your attendance will be marked and balance deducted automatically.</div>
           </div>
         </div>
-        <div class="card">
+        <div class="card fade-in">
           <div class="card-title">✅ Today's Attendance</div>
           <div class="att-list">
             {% for cfg in configs %}
@@ -742,7 +805,7 @@ textarea:focus{border-color:var(--green)}
     <!-- ═══ FEEDBACK TAB ═══ -->
     <div id="tab-feedback" class="tab-content">
       <div class="g2">
-        <div class="card">
+        <div class="card fade-in">
           <div class="card-title">⭐ Submit Feedback</div>
           <form method="POST" action="/feedback">
             <div class="g2" style="margin-bottom:0">
@@ -779,7 +842,7 @@ textarea:focus{border-color:var(--green)}
             <button type="submit" class="btn-sub">Submit Feedback →</button>
           </form>
         </div>
-        <div class="card">
+        <div class="card fade-in">
           <div class="card-title">📝 My Feedback History</div>
           <div class="fb-list">
             {% for fb in my_fb %}
@@ -849,7 +912,7 @@ textarea:focus{border-color:var(--green)}
           </div>
         </div>
       </div>
-      <div class="card">
+      <div class="card fade-in">
         <div class="card-title">📋 Transaction History</div>
         <div class="tx-list">
           {% for tx in txns %}
@@ -883,29 +946,6 @@ new QRCode(document.getElementById("qrcode"), {
 });
 
 function showTab(name, btn) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-
-  document.getElementById('tab-'+name).classList.add('active');
-  if(btn) btn.classList.add('active');
-
-  const titles = {
-    home:'Dashboard',
-    weekly:'Weekly Menu',
-    qr:'My QR Code',
-    feedback:'Feedback',
-    wallet:'Wallet & Pay',
-    bill:'Monthly Bill'
-  };
-  document.getElementById('page-title').textContent = titles[name] || 'Dashboard';
-
-  // 🔥 ADD THIS (AUTO CLOSE SIDEBAR IN MOBILE)
-  if (window.innerWidth <= 768) {
-    document.getElementById("sidebar").classList.remove("active");
-    document.getElementById("overlay").classList.remove("active");
-  }
-}
-
 function toast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast '+type;
@@ -974,4 +1014,11 @@ function toggleSidebar() {
   overlay.classList.toggle("active");
 }
 </script>
+<div class="bottom-nav">
+  <button onclick="showTab('home',this)">🏠</button>
+  <button onclick="showTab('qr',this)">📷</button>
+  <button onclick="showTab('wallet',this)">💰</button>
+  <button onclick="showTab('feedback',this)">💬</button>
+</div>
+
 </body></html>
