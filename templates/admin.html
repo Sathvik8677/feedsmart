@@ -141,6 +141,35 @@ input:checked+.slider:before{transform:translateX(18px)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-left:3px solid var(--green)}
 .toast.error{border-left:3px solid var(--red)}
+
+/* MOBILE SIDEBAR */
+.menu-btn {
+  display: none;
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: white;
+  margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    left: -250px;
+    transition: 0.3s;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .menu-btn {
+    display: block;
+  }
+}
 </style>
 </head>
 <body>
@@ -183,6 +212,7 @@ input:checked+.slider:before{transform:translateX(18px)}
 
 <main class="main">
   <div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <div>
       <h2 id="page-title">Dashboard</h2>
       <p>{{ today }} &nbsp;·&nbsp; Main Mess</p>
@@ -616,6 +646,7 @@ input:checked+.slider:before{transform:translateX(18px)}
 
     <div class="student-title">👥 Student Management</div>
 
+    <div style="overflow-x:auto;">
     <table class="student-table">
 
       <tr>
@@ -624,6 +655,7 @@ input:checked+.slider:before{transform:translateX(18px)}
         <th>Phone</th>
         <th>Type</th>
         <th>Amount</th>
+        <th>Hosteller</th> 
         <th>Top Up</th>
         <th>Delete</th>
       </tr>
@@ -652,7 +684,18 @@ input:checked+.slider:before{transform:translateX(18px)}
             ₹{{ '%.0f'|format(s.monthly_bill) }}
           {% endif %}
         </td>
-
+        <td>
+  {% if s.user_type != 'hosteller' %}
+  <form method="POST" action="/admin/make-hosteller">
+    <input type="hidden" name="user_id" value="{{ s.id }}">
+    <button type="submit" class="btn btn-add">
+      Make Hosteller
+    </button>
+  </form>
+  {% else %}
+    <span class="badge hosteller">✔ Hosteller</span>
+  {% endif %}
+</td>
         <!-- TOPUP -->
         <td>
           <form method="POST" action="/admin/topup">
@@ -675,6 +718,7 @@ input:checked+.slider:before{transform:translateX(18px)}
       {% endfor %}
 
     </table>
+</div>
 
   </div>
 </div>
@@ -766,6 +810,11 @@ function toast(msg,type='success'){
   setTimeout(()=>t.classList.add('show'),10);
   setTimeout(()=>t.classList.remove('show'),3000);
 }
+<script>
+function toggleSidebar() {
+  document.querySelector(".sidebar").classList.toggle("active");
+}
+</script>
 
 </script>
 </body></html>
