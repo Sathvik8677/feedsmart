@@ -323,6 +323,7 @@ def register():
 
             session.pop('otp', None)
             session.pop('otp_verified', None)
+	    session.pop('otp_email', None)
 
             flash('Account created! Please login.', 'success')
             return redirect(url_for('login'))
@@ -896,6 +897,10 @@ def send_otp():
         'otp': otp   # 🔥 IMPORTANT
     })
 
+
+  let formData = new FormData();
+  formData.append("otp", otp);
+
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
@@ -903,12 +908,12 @@ def verify_otp():
     if user_otp and user_otp == session.get('otp'):
         session['otp_verified'] = True
 
-        session.pop('otp', None)
-        session.pop('otp_email', None)
+        session.pop('otp', None)   # keep this
+        # ❌ DO NOT remove otp_email
 
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
-
+}
 
 init_db()   # ✅ correct
