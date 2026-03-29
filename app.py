@@ -71,7 +71,6 @@ def send_otp_email(to_email, otp):
 
     server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
     server.login(sender, password)
-```python
     server.send_message(msg)
     server.quit()
 
