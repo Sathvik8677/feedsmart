@@ -27,11 +27,17 @@ def db():
     url = os.environ.get("MYSQL_URL")
     parsed = urlparse(url)
 
+    password = parsed.password
+
+    # 🔥 FIX: convert bytes → string
+    if isinstance(password, bytes):
+        password = password.decode()
+
     return mysql.connector.connect(
         host=parsed.hostname,
-        port=parsed.port or 3306,   # 🔥 FIX HERE
+        port=parsed.port or 3306,
         user=parsed.username,
-        password=parsed.password,
+        password=password,   # ✅ fixed
         database=parsed.path[1:]
     )
 
