@@ -323,7 +323,7 @@ def register():
 
             session.pop('otp', None)
             session.pop('otp_verified', None)
-	    session.pop('otp_email', None)
+            session.pop('otp_email', None)
 
             flash('Account created! Please login.', 'success')
             return redirect(url_for('login'))
