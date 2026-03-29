@@ -170,11 +170,23 @@ input:checked+.slider:before{transform:translateX(18px)}
     display: block;
   }
 }
+#overlay {
+  display: none;
+}
+
+#overlay.active {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 150;
+}
 </style>
 </head>
 <body>
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+<div id="overlay" onclick="toggleSidebar()"></div>
   <div class="sb-brand">
     <div class="sb-logo">
       <div class="sb-icon">🍽</div>
@@ -812,7 +824,11 @@ function toast(msg,type='success'){
 }
 <script>
 function toggleSidebar() {
-  document.querySelector(".sidebar").classList.toggle("active");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("overlay");
+
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
 }
 </script>
 

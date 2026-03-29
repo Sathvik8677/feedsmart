@@ -203,12 +203,24 @@ textarea:focus{border-color:var(--green)}
   .cat-ratings{grid-template-columns:1fr}
   .wallet-actions{grid-template-columns:1fr}
 }
+#overlay {
+  display: none;
+}
+
+#overlay.active {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 150;
+}
 </style>
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
+<div id="overlay" onclick="toggleSidebar()"></div>
   <div class="sb-brand">
     <div class="sb-logo">
       <div class="sb-icon">🍽</div>
@@ -884,5 +896,15 @@ async function makePayment() {
     } else { toast('Payment failed','error'); btn.textContent='Pay & Add to Wallet →'; btn.disabled=false; }
   } catch(e) { toast('Error processing payment','error'); btn.textContent='Pay & Add to Wallet →'; btn.disabled=false; }
 }
+
+<script>
+function toggleSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("overlay");
+
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+</script>
 </script>
 </body></html>
