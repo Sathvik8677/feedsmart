@@ -898,9 +898,6 @@ def send_otp():
     })
 
 
-  let formData = new FormData();
-  formData.append("otp", otp);
-
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
@@ -908,12 +905,10 @@ def verify_otp():
     if user_otp and user_otp == session.get('otp'):
         session['otp_verified'] = True
 
-        session.pop('otp', None)   # keep this
-        # ❌ DO NOT remove otp_email
+        session.pop('otp', None)
 
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
-}
 
 init_db()   # ✅ correct
