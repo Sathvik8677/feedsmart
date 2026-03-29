@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FeedSmart — My Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf8f3;--dark:#1a1a2e;--green:#2ecc71;--green2:#27ae60;--gold:#f39c12;--red:#e74c3c;--blue:#3498db;--card:#fff;--border:#e8e3d8;--muted:#7f8c8d;--sidebar:#1a1a2e;--sidebar-w:240px}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--dark);display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:var(--sidebar);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:200;transition:transform .3s}
+.sb-brand{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{display:flex;align-items:center;gap:10px}
+.sb-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--green),var(--green2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff;letter-spacing:-.3px}
+.sb-sub{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:1px}
+.sb-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),#e67e22);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0}
+.sb-uinfo{display:flex;align-items:center;gap:10px}
+.sb-uname{color:#fff;font-size:.88rem;font-weight:600}
+.sb-uroll{color:rgba(255,255,255,.4);font-size:.74rem}
+.sb-bal{margin-top:8px;padding:8px 10px;background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.2);border-radius:8px;font-size:.78rem;color:var(--green);font-weight:600}
+.sb-nav{flex:1;padding:12px 12px;overflow-y:auto}
+.nav-group{margin-bottom:20px}
+.nav-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);padding:0 8px;margin-bottom:6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.6);font-size:.88rem;font-weight:500;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,rgba(46,204,113,.2),rgba(46,204,113,.1));color:var(--green);border:1px solid rgba(46,204,113,.15)}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sb-bottom{padding:16px 12px;border-top:1px solid rgba(255,255,255,.08)}
+.logout-btn{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:rgba(255,255,255,.5);font-size:.85rem;text-decoration:none;transition:all .2s;width:100%}
+.logout-btn:hover{background:rgba(231,76,60,.1);color:var(--red)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--dark)}
+.topbar-left p{font-size:.78rem;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.missed-pill{padding:5px 12px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.2);border-radius:20px;font-size:.75rem;color:var(--red);font-weight:600;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+.content{padding:24px 28px}
+.tab-content{display:none;animation:fadeIn .35s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.stat::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.08;transform:translate(20px,-20px)}
+.stat.green::before{background:var(--green)}
+.stat.gold::before{background:var(--gold)}
+.stat.blue::before{background:var(--blue)}
+.stat.red::before{background:var(--red)}
+.stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700}
+.stat.green .stat-val{color:var(--green2)}
+.stat.gold .stat-val{color:var(--gold)}
+.stat.blue .stat-val{color:var(--blue)}
+.stat.red .stat-val{color:var(--red)}
+.stat-sub{font-size:.76rem;color:var(--muted);margin-top:4px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.card-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px}
+
+/* MEAL CARDS */
+.meal-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:18px;transition:all .25s;position:relative;overflow:hidden}
+.meal-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(46,204,113,.1)}
+.meal-card.attended{border-color:var(--green);background:rgba(46,204,113,.03)}
+.meal-card.missed-meal{border-color:var(--red);background:rgba(231,76,60,.03)}
+.meal-card.cutoff{opacity:.75}
+.meal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.meal-icon{font-size:1.6rem}
+.meal-name{font-weight:700;font-size:.95rem;text-transform:capitalize;color:var(--dark)}
+.meal-time{font-size:.72rem;color:var(--muted);margin-top:2px}
+.meal-cost{font-size:.85rem;font-weight:700;color:var(--green2)}
+.meal-items{font-size:.82rem;color:var(--muted);line-height:1.5;margin:8px 0;min-height:36px}
+.meal-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.toggle-wrap{display:flex;gap:6px}
+.tbtn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);font-size:.78rem;font-weight:600;cursor:pointer;background:transparent;transition:all .2s;font-family:'Outfit',sans-serif}
+.tbtn.in{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08)}
+.tbtn.out{border-color:var(--red);color:var(--red);background:rgba(231,76,60,.08)}
+.tbtn:disabled{opacity:.4;cursor:not-allowed}
+.att-chip{padding:5px 12px;background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3);border-radius:20px;font-size:.75rem;font-weight:700;color:var(--green2)}
+.missed-chip{padding:5px 12px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);border-radius:20px;font-size:.75rem;font-weight:700;color:var(--red);animation:blink 2s infinite}
+.cutoff-chip{padding:5px 12px;background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.25);border-radius:20px;font-size:.75rem;font-weight:600;color:var(--gold)}
+.cnt-badge{font-size:.75rem;color:var(--muted);font-weight:500}
+
+/* ANNOUNCEMENT */
+.ann{padding:14px 16px;border-radius:12px;margin-bottom:10px;border-left:4px solid transparent;transition:all .2s}
+.ann.high{background:rgba(231,76,60,.06);border-left-color:var(--red)}
+.ann.normal{background:rgba(52,152,219,.05);border-left-color:var(--blue)}
+.ann-title{font-weight:600;font-size:.9rem;margin-bottom:3px}
+.ann-body{font-size:.83rem;color:var(--muted);line-height:1.5}
+.ann-date{font-size:.72rem;color:var(--muted);margin-top:5px;opacity:.7}
+
+/* WEEKLY */
+.week-grid{display:grid;gap:12px}
+.week-day{border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s}
+.week-day:hover{border-color:var(--green);box-shadow:0 2px 12px rgba(46,204,113,.08)}
+.week-day.today{border-color:var(--green);background:rgba(46,204,113,.02)}
+.week-header{padding:10px 16px;background:rgba(0,0,0,.02);display:flex;align-items:center;justify-content:space-between;font-size:.82rem;font-weight:600;color:var(--dark)}
+.today-tag{padding:2px 10px;background:var(--green);color:#fff;border-radius:20px;font-size:.68rem;font-weight:700}
+.week-meals{display:grid;grid-template-columns:repeat(4,1fr)}
+.week-meal{padding:10px 12px;border-right:1px solid var(--border)}
+.week-meal:last-child{border-right:none}
+.wm-type{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.wm-items{font-size:.78rem;color:var(--dark);line-height:1.4}
+
+/* QR */
+.qr-container{display:flex;flex-direction:column;align-items:center;padding:30px}
+#qrcode{padding:16px;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);border:3px solid var(--green);margin-bottom:20px}
+.qr-name{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:4px;text-align:center}
+.qr-roll{font-size:.88rem;color:var(--muted);margin-bottom:16px;text-align:center}
+.qr-note{font-size:.8rem;color:var(--muted);text-align:center;max-width:280px;line-height:1.6;padding:12px 16px;background:rgba(46,204,113,.05);border-radius:10px;border:1px solid rgba(46,204,113,.15)}
+.att-list{margin-top:20px;width:100%;max-width:300px}
+.att-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.att-row:last-child{border-bottom:none}
+.att-mt{text-transform:capitalize;font-weight:500}
+
+/* FEEDBACK */
+.star-row{display:flex;gap:8px;margin-bottom:14px}
+.star{font-size:1.8rem;cursor:pointer;opacity:.25;transition:all .15s;line-height:1}
+.star.active{opacity:1}
+.cat-ratings{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.cat-r label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);display:block;margin-bottom:5px}
+select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--dark);background:var(--cream);transition:border-color .2s;outline:none}
+select:focus{border-color:var(--green)}
+textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--dark);background:var(--cream);resize:vertical;min-height:80px;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--green)}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px}
+.fg input,.fg select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--dark);background:var(--cream);outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:var(--green)}
+.btn-sub{padding:11px 24px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s}
+.btn-sub:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(46,204,113,.3)}
+.fb-list .fbi{padding:12px 0;border-bottom:1px solid var(--border)}
+.fb-list .fbi:last-child{border-bottom:none}
+.fb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.fb-mt{font-size:.8rem;font-weight:600;text-transform:capitalize}
+.fb-stars{color:var(--gold);font-size:.85rem}
+.fb-comment{font-size:.8rem;color:var(--muted)}
+
+/* WALLET */
+.wallet-hero{background:linear-gradient(135deg,var(--dark),#2c3e50);border-radius:20px;padding:30px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden}
+.wallet-hero::before{content:'';position:absolute;top:-40%;right:-20%;width:300px;height:300px;background:radial-gradient(circle,rgba(46,204,113,.2),transparent 70%)}
+.wallet-hero::after{content:'';position:absolute;bottom:-40%;left:-20%;width:250px;height:250px;background:radial-gradient(circle,rgba(243,156,18,.15),transparent 70%)}
+.wallet-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;opacity:.6;margin-bottom:8px;position:relative;z-index:1}
+.wallet-amount{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;margin-bottom:4px;position:relative;z-index:1}
+.wallet-sub{font-size:.8rem;opacity:.6;position:relative;z-index:1}
+.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.pay-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px}
+.pay-card h3{font-size:.9rem;font-weight:700;margin-bottom:14px;color:var(--dark)}
+.pay-methods{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pm{padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif}
+.pm.selected{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08)}
+.amount-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:600;color:var(--dark);background:var(--cream);outline:none;margin-bottom:10px;transition:border-color .2s}
+.amount-input:focus{border-color:var(--green)}
+.quick-amounts{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.qa{padding:5px 12px;border:1px solid var(--border);border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif}
+.qa:hover{border-color:var(--green);color:var(--green)}
+.btn-pay{width:100%;padding:12px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .25s}
+.btn-pay:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
+.tx-list .txi{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.tx-list .txi:last-child{border-bottom:none}
+.txi-desc{color:var(--dark);font-weight:500}
+.txi-date{font-size:.72rem;color:var(--muted)}
+.tx-debit{color:var(--red);font-weight:700}
+.tx-credit{color:var(--green2);font-weight:700}
+.pay-success{display:none;text-align:center;padding:20px}
+.pay-success .check{font-size:3rem;margin-bottom:12px;animation:pop .4s cubic-bezier(.16,1,.3,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.pay-success h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:var(--green2)}
+.pay-success p{color:var(--muted);font-size:.85rem}
+.ref-code{margin-top:10px;padding:8px 16px;background:var(--cream);border-radius:8px;font-size:.78rem;font-family:monospace;color:var(--dark)}
+
+/* ALERTS */
+.ale{padding:11px 15px;border-radius:10px;margin-bottom:14px;font-size:.86rem;display:flex;align-items:center;gap:8px}
+.ale-success{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);color:var(--green2)}
+.ale-error{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);color:var(--red)}
+.empty{text-align:center;color:var(--muted);font-size:.87rem;padding:24px 0;opacity:.7}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:4px solid var(--green)}
+.toast.error{border-left:4px solid var(--red)}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .stats{grid-template-columns:1fr 1fr}
+  .g2,.g3{grid-template-columns:1fr}
+  .week-meals{grid-template-columns:1fr 1fr}
+  .cat-ratings{grid-template-columns:1fr}
+  .wallet-actions{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="sb-icon">🍽</div>
+      <div>
+        <div class="sb-title">FeedSmart</div>
+        <div class="sb-sub">Student Portal</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-uinfo">
+      <div class="sb-avatar">{{ u.name[0].upper() }}</div>
+      <div>
+        <div class="sb-uname">{{ u.name }}</div>
+        <div class="sb-uroll">{{ u.roll_no or 'No Roll No' }}</div>
+      </div>
+    </div>
+<div class="sb-bal">
+{% if u.user_type == 'dayscholar' %}
+  💳 Balance: ₹{{ '%.0f'|format(u.mess_balance) }}
+{% else %}
+  🏨 Monthly Bill: ₹{{ grand_total if u.user_type=='hosteller' else u.mess_balance }}
+{% endif %}
+</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-group">
+      <div class="nav-label">Main</div>
+      <button class="nav-item active" onclick="showTab('home',this)"><span class="nav-icon">🏠</span>Home</button>
+      <button class="nav-item" onclick="showTab('weekly',this)"><span class="nav-icon">📅</span>Weekly Menu</button>
+      <button class="nav-item" onclick="showTab('qr',this)"><span class="nav-icon">🎫</span>My QR Code</button>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Interact</div>
+      <button class="nav-item" onclick="showTab('bill',this)">
+      <span class="nav-icon">📊</span>Monthly Bill
+    </button>
+      <button class="nav-item" onclick="showTab('feedback',this)"><span class="nav-icon">⭐</span>Feedback</button>
+      <button class="nav-item" onclick="showTab('wallet',this)"><span class="nav-icon">💰</span>Wallet & Pay</button>
+    </div>
+    {% if missed %}
+    <div class="nav-group">
+      <div class="nav-label" style="color:var(--red)">⚠ Missed Today</div>
+      {% for m in missed %}
+      <div style="padding:8px 10px;border-radius:8px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.15);color:var(--red);font-size:.8rem;font-weight:600;margin-bottom:4px;text-transform:capitalize">
+        ❌ {{ m }} missed
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </nav>
+  <div class="sb-bottom">
+    <a href="/logout" class="logout-btn">🚪 <span>Sign Out</span></a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2 id="page-title">Dashboard</h2>
+      <p>{{ today_str }}</p>
+    </div>
+    <div class="topbar-right">
+      {% if missed %}
+      <div class="missed-pill">⚠ {{ missed|length }} meal(s) missed today</div>
+      {% endif %}
+    </div>
+  </div>
+
+<div class="content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="ale ale-{{cat}}">
+        {% if cat=='success' %}✅{% else %}⚠️{% endif %} {{msg}}
+      </div>
+    {% endfor %}
+  {% endwith %} 
+
+<!-- ═══ MONTHLY BILL TAB ═══ -->
+
+
+<div id="tab-bill" class="tab-content">
+
+  <!-- 🔥 INLINE STYLES (NO CSS FILE NEEDED) -->
+  <style>
+    .bill-card {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .bill-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #333;
+      text-align: center;
+    }
+
+    .bill-total-box {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .bill-total-box h2 {
+      margin: 0;
+      font-size: 2rem;
+      color: #2e7d32;
+    }
+
+    .bill-total-box small {
+      color: #777;
+    }
+
+    .bill-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .bill-table th {
+      background: linear-gradient(135deg, #4CAF50, #2e7d32);
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .bill-table td {
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+
+    .bill-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .date-row {
+      background: #e8f5e9 !important;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .daily-total {
+      background: #fff3e0;
+      font-weight: 600;
+      color: #ef6c00;
+    }
+
+    .grand-total {
+     background: linear-gradient(135deg, #ff9800, #f57c00); /* orange highlight */
+     color: white;
+     font-size: 1.1rem;
+     font-weight: bold;
+     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+     }
+
+.grand-total td {
+  color:white;
+}
+    .amount {
+      font-weight: 700;
+    }
+  </style>
+
+  <div class="bill-card">
+
+    <div class="bill-title">📊 Monthly Bill Details</div>
+
+    {% if u.user_type == 'hosteller' %}
+
+    <!-- 💰 BIG TOTAL -->
+    <div class="bill-total-box">
+      <h2>₹{{ grand_total }}</h2>
+      <small>This Month</small>
+    </div>
+<button onclick="window.location.href='/download_bill'" 
+        style="
+          margin-bottom:12px;
+          padding:8px 14px;
+          border:none;
+          border-radius:8px;
+          background:linear-gradient(135deg,#4caf50,#2e7d32);
+          color:white;
+          font-weight:600;
+          cursor:pointer;">
+  📄 Download PDF
+</button>
+
+    <table class="bill-table">
+      <tr>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Cost</th>
+      </tr>
+
+      {% for date, data in attendance.items() %}
+
+      <!-- 📅 DATE -->
+      <tr class="date-row">
+        <td colspan="3">📅 {{ date }}</td>
+      </tr>
+
+      <!-- 🍽 MEALS -->
+      {% for a in data['items'] %}
+      <tr>
+        <td></td>
+        <td>
+          {% if a.meal_type == 'breakfast' %} 🌅 {% endif %}
+          {% if a.meal_type == 'lunch' %} ☀️ {% endif %}
+          {% if a.meal_type == 'snacks' %} 🫖 {% endif %}
+          {% if a.meal_type == 'dinner' %} 🌙 {% endif %}
+          {{ a.meal_type.capitalize() }}
+        </td>
+        <td class="amount">₹{{ '%.2f'|format(a.cost_charged) }}</td>
+      </tr>
+      {% endfor %}
+
+      <!-- 🔥 DAILY TOTAL -->
+      <tr class="daily-total">
+        <td colspan="2">🍽 Daily Total</td>
+        <td class="amount">₹{{ data.total }}</td>
+      </tr>
+
+      {% endfor %}
+
+      <!-- 💰 GRAND TOTAL -->
+      <tr class="grand-total">
+        <td colspan="2">💰 Grand Total</td>
+        <td class="amount">₹{{ grand_total }}</td>
+      </tr>
+
+    </table>
+
+    {% else %}
+      <p style="text-align:center;color:gray;">
+        This feature is only for hostellers.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+</div>
+    <!-- ═══ HOME TAB ═══ -->
+    <div id="tab-home" class="tab-content active">
+      <div class="stats">
+        <div class="stat green">
+          <div class="stat-label">
+	{% if u.user_type == 'dayscholar' %}
+  	Mess Balance
+	{% else %}
+ 	 Monthly Bill
+	{% endif %}
+	</div>
+          <div class="stat-val" id="live-balance">{% if u.user_type == 'dayscholar' %}
+  ₹{{ '%.0f'|format(u.mess_balance) }}
+{% else %}
+  ₹{{ grand_total if u.user_type=='hosteller' else u.mess_balance }}
+{% endif %}</div>
+          <div class="stat-sub">Available funds</div>
+        </div>
+        <div class="stat gold">
+          <div class="stat-label">Today Attended</div>
+          <div class="stat-val">{{ att_today|length }}/{{ meal_order|length }}</div>
+          <div class="stat-sub">Meals eaten</div>
+        </div>
+        <div class="stat blue">
+          <div class="stat-label">Opted In</div>
+          <div class="stat-val">{{ optins.values()|list|select('equalto','in')|list|length }}</div>
+          <div class="stat-sub">Meals confirmed</div>
+        </div>
+        <div class="stat red">
+          <div class="stat-label">Missed Today</div>
+          <div class="stat-val">{{ missed|length }}</div>
+          <div class="stat-sub">Meals missed</div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+      {% if anns %}
+      <div class="card">
+        <div class="card-title">📢 Announcements</div>
+        {% for a in anns %}
+        <div class="ann {{ a.priority }}">
+          <div class="ann-title">{% if a.priority=='high' %}🔴{% else %}🔵{% endif %} {{ a.title }}</div>
+          <div class="ann-body">{{ a.body }}</div>
+          <div class="ann-date">{{ a.created_at.strftime('%Y-%m-%d') }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- TODAY'S MEALS -->
+      <div class="card">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">🍽 Today's Meals — Opt-In / Out</div>
+          <span style="font-size:.78rem;color:var(--muted)">{{ today }}</span>
+        </div>
+        <div class="g2" style="margin-bottom:0">
+          {% for cfg in configs %}
+          {% set mt = cfg.meal_type %}
+          {% set status = optins.get((today|string, mt), optins.get((today, mt), 'in')) %}
+          {% set cutoff_passed = is_past_cutoff(cfg.cutoff_time) %}
+          {% set menu_item = today_menu.get(mt) %}
+          <div class="meal-card {% if mt in att_today %}attended{% elif mt in missed %}missed-meal{% elif cutoff_passed %}cutoff{% endif %}">
+            <div class="meal-header">
+              <div>
+                <div class="meal-name">
+                  {% if mt=='breakfast' %}🌅{% elif mt=='lunch' %}☀️{% elif mt=='snacks' %}🫖{% else %}🌙{% endif %}
+                  {{ mt }}
+                </div>
+                <div class="meal-time">{{ cfg.start_time }} – {{ cfg.end_time }} &nbsp;|&nbsp; Cutoff: {{ cfg.cutoff_time }}</div>
+              </div>
+              <div class="meal-cost">₹{{ '%.0f'|format(cfg.cost) }}</div>
+            </div>
+            <div class="meal-items">{{ menu_item['items'] if menu_item else 'Menu not set yet' }}</div>
+            <div class="meal-footer">
+              <span class="cnt-badge" id="cnt-t-{{ mt }}">–</span>
+              {% if mt in att_today %}
+                <span class="att-chip">✓ Attended</span>
+              {% elif mt in missed %}
+                <span class="missed-chip">❌ Missed</span>
+              {% elif cutoff_passed %}
+                <span class="cutoff-chip">⏰ Cutoff Passed</span>
+              {% else %}
+              <div class="toggle-wrap">
+                <button class="tbtn {% if status=='in' %}in{% endif %}" id="btn-in-t-{{ mt }}" onclick="setOptin('{{today}}','{{mt}}','in',this)">✓ Opt In</button>
+                <button class="tbtn {% if status=='out' %}out{% endif %}" id="btn-out-t-{{ mt }}" onclick="setOptin('{{today}}','{{mt}}','out',this)">✗ Opt Out</button>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% else %}
+          <div class="empty">No meals configured</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- TOMORROW PRE-BOOK -->
+      <div class="card">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">🗓 Tomorrow — Pre-Book Meals</div>
+          <span style="font-size:.78rem;color:var(--muted)">{{ tomorrow }}</span>
+        </div>
+        <div class="g2" style="margin-bottom:0">
+          {% for cfg in configs %}
+          {% set mt = cfg.meal_type %}
+          {% set status = optins.get((tomorrow|string, mt), optins.get((tomorrow, mt), 'in')) %}
+          {% set tmr_menu = weekly.get(tomorrow, {}).get(mt) %}
+          <div class="meal-card">
+            <div class="meal-header">
+              <div>
+                <div class="meal-name">{% if mt=='breakfast' %}🌅{% elif mt=='lunch' %}☀️{% elif mt=='snacks' %}🫖{% else %}🌙{% endif %} {{ mt }}</div>
+                <div class="meal-time">Cutoff: {{ cfg.cutoff_time }}</div>
+              </div>
+              <div class="meal-cost">₹{{ '%.0f'|format(cfg.cost) }}</div>
+            </div>
+            <div class="meal-items">{{ tmr_menu['items'] if tmr_menu else 'Menu not set yet' }}</div>
+            <div class="meal-footer">
+              <span class="cnt-badge" id="cnt-{{ mt }}">{{ tmr_counts.get(mt,0) }} opted in</span>
+              <div class="toggle-wrap">
+                <button class="tbtn {% if status=='in' %}in{% endif %}" id="btn-in-{{ mt }}" onclick="setOptin('{{tomorrow}}','{{mt}}','in',this)">✓ In</button>
+                <button class="tbtn {% if status=='out' %}out{% endif %}" id="btn-out-{{ mt }}" onclick="setOptin('{{tomorrow}}','{{mt}}','out',this)">✗ Out</button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ WEEKLY TAB ═══ -->
+    <!-- ═══ WEEKLY TAB ═══ -->
+<div id="tab-weekly" class="tab-content">
+  <div class="card">
+    <div class="card-title">📅 Weekly Menu</div>
+
+    <div class="week-grid">
+      {% for d, meals in weekly.items() %}
+      <div class="week-day {% if d==today %}today{% endif %}">
+        
+        <div class="week-header">
+          <span>{{ d }}</span>
+          {% if d==today %}
+            <span class="today-tag">TODAY</span>
+          {% endif %}
+        </div>
+
+        <div class="week-meals">
+          {% for cfg in configs %}
+            {% set mt = cfg.meal_type %}
+            {% set mi = meals.get(mt) %}
+
+            <div class="week-meal">
+              <div class="wm-type">{{ mt }}</div>
+              <div class="wm-items">{{ mi['items'] if mi else '—' }}</div>
+            </div>
+
+          {% endfor %}
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+    <!-- ═══ QR TAB ═══ -->
+    <div id="tab-qr" class="tab-content">
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">🎫 My Mess QR Code</div>
+          <div class="qr-container">
+            <div id="qrcode"></div>
+            <div class="qr-name">{{ u.name }}</div>
+            <div class="qr-roll">{{ u.roll_no or 'No Roll No' }} · {{ u.email }}</div>
+            <div class="qr-note">Show this QR code to the mess administrator at meal time. Your attendance will be marked and balance deducted automatically.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ Today's Attendance</div>
+          <div class="att-list">
+            {% for cfg in configs %}
+            {% set mt = cfg.meal_type %}
+            <div class="att-row">
+              <span class="att-mt">{% if mt=='breakfast' %}🌅{% elif mt=='lunch' %}☀️{% elif mt=='snacks' %}🫖{% else %}🌙{% endif %} {{ mt }}</span>
+              {% if mt in att_today %}
+                <span class="att-chip">✓ Marked</span>
+              {% elif mt in missed %}
+                <span class="missed-chip">❌ Missed</span>
+              {% else %}
+                <span style="color:var(--muted);font-size:.8rem">Not yet</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          <div class="card-title" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">📋 Instructions</div>
+          <div style="font-size:.83rem;color:var(--muted);line-height:2">
+            <p>1. Open QR Code tab before entering mess</p>
+            <p>2. Show QR to mess administrator</p>
+            <p>3. Wait for green confirmation beep</p>
+            <p>4. ₹{{ configs[0].cost if configs else 'X' }}–₹{{ configs[-1].cost if configs else 'X' }} deducted per meal</p>
+            <p>5. Check wallet for deduction history</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FEEDBACK TAB ═══ -->
+    <div id="tab-feedback" class="tab-content">
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">⭐ Submit Feedback</div>
+          <form method="POST" action="/feedback">
+            <div class="g2" style="margin-bottom:0">
+              <div class="fg"><label>Date</label>
+                <select name="date"><option value="{{ today }}">Today — {{ today }}</option></select>
+              </div>
+              <div class="fg"><label>Meal</label>
+                <select name="meal_type">
+                  {% for cfg in configs %}<option value="{{ cfg.meal_type }}">{{ cfg.meal_type|capitalize }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="fg">
+              <label>Overall Rating</label>
+              <div class="star-row" id="stars">
+                {% for i in range(1,6) %}<span class="star {% if i<=3 %}active{% endif %}" onclick="setRating({{i}})">★</span>{% endfor %}
+              </div>
+              <input type="hidden" name="rating" id="rval" value="3">
+            </div>
+            <div class="cat-ratings">
+              <div class="cat-r"><label>Taste</label>
+                <select name="taste">{% for i in range(1,6) %}<option value="{{i}}" {% if i==3 %}selected{% endif %}>{{i}} ★</option>{% endfor %}</select>
+              </div>
+              <div class="cat-r"><label>Quantity</label>
+                <select name="quantity">{% for i in range(1,6) %}<option value="{{i}}" {% if i==3 %}selected{% endif %}>{{i}} ★</option>{% endfor %}</select>
+              </div>
+              <div class="cat-r"><label>Cleanliness</label>
+                <select name="cleanliness">{% for i in range(1,6) %}<option value="{{i}}" {% if i==3 %}selected{% endif %}>{{i}} ★</option>{% endfor %}</select>
+              </div>
+            </div>
+            <div class="fg"><label>Comments (optional)</label>
+              <textarea name="comment" placeholder="Tell us what you thought..."></textarea>
+            </div>
+            <button type="submit" class="btn-sub">Submit Feedback →</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-title">📝 My Feedback History</div>
+          <div class="fb-list">
+            {% for fb in my_fb %}
+            <div class="fbi">
+              <div class="fb-header">
+                <span class="fb-mt">{{ fb.meal_type }} · {{ fb.date }}</span>
+                <span class="fb-stars">{{ '★'*fb.rating }}{{ '☆'*(5-fb.rating) }}</span>
+              </div>
+              <div style="font-size:.75rem;color:var(--muted)">T:{{ fb.taste }}★ Q:{{ fb.quantity }}★ C:{{ fb.cleanliness }}★</div>
+              {% if fb.comment %}<div class="fb-comment">{{ fb.comment }}</div>{% endif %}
+            </div>
+            {% else %}<div class="empty">No feedback submitted yet</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ WALLET TAB ═══ -->
+    <div id="tab-wallet" class="tab-content">
+      <div class="wallet-hero">
+        <div class="wallet-label">Mess Balance</div>
+        <div class="wallet-amount" id="wallet-balance">₹{{ '%.2f'|format(u.mess_balance) }}</div>
+        <div class="wallet-sub">₹ per meal deducted on QR scan</div>
+      </div>
+      <div class="wallet-actions">
+        <div class="pay-card">
+          <h3>💳 Top Up Balance</h3>
+          <div class="pay-methods">
+            <button class="pm selected" onclick="selMethod('upi',this)">📱 UPI</button>
+            <button class="pm" onclick="selMethod('card',this)">💳 Card</button>
+            <button class="pm" onclick="selMethod('netbanking',this)">🏦 Net Banking</button>
+          </div>
+          <input type="number" class="amount-input" id="pay-amount" placeholder="₹ Enter amount" min="1" step="1">
+          <div class="quick-amounts">
+            <button class="qa" onclick="setAmt(100)">₹100</button>
+            <button class="qa" onclick="setAmt(250)">₹250</button>
+            <button class="qa" onclick="setAmt(500)">₹500</button>
+            <button class="qa" onclick="setAmt(1000)">₹1000</button>
+            <button class="qa" onclick="setAmt(2000)">₹2000</button>
+          </div>
+          <button class="btn-pay" onclick="makePayment()">Pay & Add to Wallet →</button>
+          <div class="pay-success" id="pay-success">
+            <div class="check">✅</div>
+            <h3>Payment Successful!</h3>
+            <p>Amount added to your mess wallet</p>
+            <div class="ref-code" id="ref-code"></div>
+          </div>
+        </div>
+        <div class="pay-card">
+          <h3>💡 Meal Costs</h3>
+          {% for cfg in configs %}
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.86rem">
+            <span>{% if cfg.meal_type=='breakfast' %}🌅{% elif cfg.meal_type=='lunch' %}☀️{% elif cfg.meal_type=='snacks' %}🫖{% else %}🌙{% endif %} {{ cfg.meal_type|capitalize }}</span>
+            <strong style="color:var(--green2)">₹{{ '%.0f'|format(cfg.cost) }}</strong>
+          </div>
+          {% endfor %}
+          <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:.86rem;font-weight:700;color:var(--dark)">
+            <span>Daily Total (all meals)</span>
+            <span style="color:var(--green2)">₹{{ configs|sum(attribute='cost')|int }}</span>
+          </div>
+          <div style="margin-top:12px;font-size:.78rem;color:var(--muted);line-height:1.7;padding:10px;background:var(--cream);border-radius:8px">
+            • Balance deducted on QR scan only<br>
+            • No deduction for skipped meals<br>
+            • Min. ₹100 balance recommended<br>
+            • Refund requests: contact admin
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Transaction History</div>
+        <div class="tx-list">
+          {% for tx in txns %}
+          <div class="txi">
+            <div>
+              <div class="txi-desc">{{ tx.description }}</div>
+              <div class="txi-date">{{ tx.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+            <span class="{{ 'tx-debit' if tx.type=='debit' else 'tx-credit' }}">
+              {{ '−' if tx.type=='debit' else '+' }}₹{{ '%.0f'|format(tx.amount) }}
+            </span>
+          </div>
+          {% else %}<div class="empty">No transactions yet</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+const QR_DATA = {{ {'uid': u.id, 'name': u.name, 'roll': u.roll_no or '', 'app': 'FeedSmart'}|tojson }};
+new QRCode(document.getElementById("qrcode"), {
+  text: JSON.stringify(QR_DATA), width: 200, height: 200,
+  colorDark: "#1a1a2e", colorLight: "#ffffff",
+  correctLevel: QRCode.CorrectLevel.M
+});
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+const titles = {
+  home:'Dashboard',
+  weekly:'Weekly Menu',
+  qr:'My QR Code',
+  feedback:'Feedback',
+  wallet:'Wallet & Pay',
+  bill:'Monthly Bill'   // ✅ ADD THIS
+};
+  document.getElementById('page-title').textContent = titles[name] || 'Dashboard';
+}
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type;
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function setOptin(mealDate, meal, status, btn) {
+  try {
+    const res = await fetch('/optin', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:mealDate,meal_type:meal,status})});
+    const data = await res.json();
+    if(data.cutoff) { toast('⏰ Cutoff time passed!','error'); return; }
+    if(data.success) {
+      const prefix = mealDate === '{{ today }}' ? '-t-' : '-';
+      ['in','out'].forEach(s => {
+        const b = document.getElementById(`btn-${s}${prefix}${meal}`);
+        if(b) b.className = 'tbtn';
+      });
+      const target = document.getElementById(`btn-${status}${prefix}${meal}`);
+      if(target) target.className = 'tbtn ' + status;
+      const cntEl = document.getElementById(`cnt${prefix}${meal}`);
+      if(cntEl) cntEl.textContent = data.count + ' opted in';
+      toast(status === 'in' ? `✓ Opted in for ${meal}` : `✗ Opted out of ${meal}`);
+    }
+  } catch(e) { toast('Something went wrong','error'); }
+}
+
+function setRating(v) {
+  document.getElementById('rval').value = v;
+  document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < v));
+}
+
+let selPayMethod = 'upi';
+function selMethod(m, btn) {
+  selPayMethod = m;
+  document.querySelectorAll('.pm').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function setAmt(a) { document.getElementById('pay-amount').value = a; }
+
+async function makePayment() {
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  if(!amount || amount < 1) { toast('Enter a valid amount','error'); return; }
+  const btn = document.querySelector('.btn-pay');
+  btn.textContent = 'Processing...'; btn.disabled = true;
+  try {
+    const res = await fetch('/pay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,method:selPayMethod})});
+    const data = await res.json();
+    if(data.success) {
+      document.getElementById('pay-success').style.display = 'block';
+      document.getElementById('ref-code').textContent = 'Ref: ' + data.reference;
+      document.querySelector('.wallet-amount').textContent = '₹' + data.new_balance.toFixed(2);
+      document.getElementById('wallet-balance').textContent = '₹' + data.new_balance.toFixed(2);
+      document.getElementById('live-balance').textContent = '₹' + Math.round(data.new_balance);
+      document.querySelector('#sidebar .sb-bal').textContent = '💳 Balance: ₹' + data.new_balance.toFixed(2);
+      toast('✅ ₹' + amount + ' added to wallet!');
+      setTimeout(() => { document.getElementById('pay-success').style.display='none'; btn.textContent='Pay & Add to Wallet →'; btn.disabled=false; document.getElementById('pay-amount').value=''; }, 4000);
+    } else { toast('Payment failed','error'); btn.textContent='Pay & Add to Wallet →'; btn.disabled=false; }
+  } catch(e) { toast('Error processing payment','error'); btn.textContent='Pay & Add to Wallet →'; btn.disabled=false; }
+}
+</script>
+</body></html>

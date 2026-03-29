@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FeedSmart — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--cream:#faf8f3;--dark:#1a1a2e;--green:#2ecc71;--green2:#27ae60;--gold:#f39c12;--card:#ffffff;--text:#1a1a2e;--muted:#7f8c8d;--border:#e8e3d8;--red:#e74c3c}
+body{font-family:'Outfit',sans-serif;background:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:20px 0}
+.bg-art{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-art::before{content:'';position:absolute;top:-20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(46,204,113,.12) 0%,transparent 70%);animation:pulse 6s ease-in-out infinite}
+.bg-art::after{content:'';position:absolute;bottom:-20%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(243,156,18,.08) 0%,transparent 70%);animation:pulse 8s ease-in-out infinite reverse}
+.dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(26,26,46,.08) 1px,transparent 1px);background-size:28px 28px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.wrap{position:relative;z-index:1;width:100%;max-width:480px;padding:20px;animation:slideUp .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.brand{text-align:center;margin-bottom:28px}
+.brand-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--green),var(--green2));border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;box-shadow:0 8px 24px rgba(46,204,113,.3)}
+.brand h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--dark)}
+.brand p{color:var(--muted);font-size:.88rem;margin-top:3px}
+.card{background:var(--card);border-radius:24px;padding:36px;box-shadow:0 4px 6px rgba(0,0,0,.04),0 20px 60px rgba(0,0,0,.08);border:1px solid var(--border)}
+.card h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--dark);margin-bottom:4px}
+.card p.sub{color:var(--muted);font-size:.87rem;margin-bottom:24px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:.76rem;font-weight:600;color:var(--dark);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;padding:12px 15px;background:var(--cream);border:2px solid var(--border);border-radius:11px;font-family:'Outfit',sans-serif;font-size:.92rem;color:var(--dark);transition:all .25s;outline:none}
+.input-wrap input:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 4px rgba(46,204,113,.1)}
+.input-wrap .icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:1rem;opacity:.35}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:.98rem;font-weight:600;cursor:pointer;transition:all .25s;margin-top:4px;box-shadow:0 4px 20px rgba(46,204,113,.3)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(46,204,113,.4)}
+.lnk{text-align:center;margin-top:18px;font-size:.87rem;color:var(--muted)}
+.lnk a{color:var(--green);text-decoration:none;font-weight:600}
+.ale{padding:11px 15px;border-radius:10px;margin-bottom:16px;font-size:.86rem;display:flex;align-items:center;gap:8px}
+.ale-error{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);color:var(--red)}
+.ale-success{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);color:var(--green2)}
+.hint{font-size:.74rem;color:var(--muted);margin-top:4px}
+.bal-note{margin-top:16px;padding:12px 14px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.18);border-radius:10px;font-size:.8rem;color:var(--muted);text-align:center}
+.bal-note strong{color:var(--green2)}
+<style>
+#msgBox {
+  transition: all 0.3s ease;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+#msgBox.show {
+  transform: scale(1);
+  opacity: 1;
+}
+</style>
+</style>
+</head>
+<body>
+<div class="bg-art"><div class="dots"></div></div>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-icon">🍽</div>
+    <h1>FeedSmart</h1>
+    <p>Create your student account</p>
+  </div>
+  <div class="card">
+    <h2>Join FeedSmart</h2>
+    <p class="sub">Register to manage your meals, payments & feedback</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}
+        <div class="ale ale-{{cat}}"><span>{% if cat=='error' %}⚠️{% else %}✅{% endif %}</span> {{msg}}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <div class="fg">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <input type="text" name="name" placeholder="Your full name" required>
+          <span class="icon">👤</span>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg">
+          <label>Roll Number</label>
+          <div class="input-wrap">
+            <input type="text" name="roll_no" placeholder="23CSE001">
+          </div>
+        </div>
+        <div class="fg">
+          <label>Phone</label>
+          <div class="input-wrap">
+            <input type="tel" name="phone" placeholder="9876543210">
+          </div>
+        </div>
+      </div>
+<div class="form-group">
+  <label>Email Address</label>
+  <div class="input-wrap">
+    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    <span class="icon">✉</span>
+  </div>
+</div>
+<div style="margin-top:10px;">
+  <button type="button" id="sendBtn" onclick="sendOTP()">📩 Send OTP</button>
+</div>
+
+<div style="margin-top:10px;">
+  <input type="text" id="otp" placeholder="Enter OTP">
+  <button type="button" onclick="verifyOTP()">✅ Verify</button>
+</div>
+
+<div id="otpStatus"></div>
+<div id="msgBox" style="
+  margin-top:10px;
+  padding:10px;
+  border-radius:8px;
+  display:none;
+  font-weight:600;
+"></div>
+      <div class="fg">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" name="password" id="pwd" placeholder="Min. 6 characters" required minlength="6">
+          <span class="icon" style="cursor:pointer" onclick="togglePwd()">👁</span>
+        </div>
+        <div class="hint">Use a strong password with letters and numbers</div>
+      </div>
+      <button class="btn" id="registerBtn" type="submit" disabled>
+  Create Account →
+</button>
+    </form>
+    <div class="bal-note">Starting mess balance: <strong>₹0.00</strong> — Top up after login via Wallet tab</div>
+    <div class="lnk" style="margin-top:14px">Already have an account? <a href="/login">Sign In</a></div>
+  </div>
+</div>
+<script>
+function togglePwd(){const p=document.getElementById('pwd');p.type=p.type==='password'?'text':'password'}
+</script>
+<script>
+function showMessage(text, color){
+  let box = document.getElementById("msgBox");
+
+  box.style.display = "block";
+  box.style.background = color;
+  box.style.color = "white";
+  box.innerHTML = text;
+
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 3000);
+}
+
+function sendOTP(){
+  let email = document.getElementById("email").value;
+  let btn = document.getElementById("sendBtn");
+
+  if(!email){
+    showMessage("Enter email first ❌", "red");
+    return;
+  }
+
+  btn.innerHTML = "Sending...";
+  btn.disabled = true;
+
+  let formData = new FormData();
+  formData.append("email", email);
+
+  fetch('/send_otp',{
+    method:'POST',
+    body: formData
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    showMessage("OTP Sent ✅", "green");
+    btn.innerHTML = "Resend OTP";
+    btn.disabled = false;
+  })
+  .catch(()=>{
+    showMessage("Error ❌", "red");
+    btn.innerHTML = "Send OTP";
+    btn.disabled = false;
+  });
+}
+
+function verifyOTP(){
+  let otp = document.getElementById("otp").value;
+
+  if(!otp){
+    showMessage("Enter OTP ❌", "red");
+    return;
+  }
+
+  let formData = new FormData();
+  formData.append("otp", otp);
+
+  fetch('/verify_otp',{
+    method:'POST',
+    body: formData
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.success){
+      showMessage("OTP Verified ✅", "green");
+
+      document.getElementById("registerBtn").disabled = false;
+      document.getElementById("email").readOnly = true;
+
+    } else {
+      showMessage("Wrong OTP ❌", "red");
+    }
+  });
+}
+</script>
+</body></html>

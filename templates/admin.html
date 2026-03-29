@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FeedSmart — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--sidebar:#13151c;--card:#1a1d27;--card2:#1e2130;--border:#2a2d3e;--text:#e8eaf0;--muted:#6b7280;--green:#10b981;--green2:#059669;--gold:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--sidebar-w:250px}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:var(--sidebar);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:200;border-right:1px solid var(--border)}
+.sb-brand{padding:22px 20px;border-bottom:1px solid var(--border)}
+.sb-logo{display:flex;align-items:center;gap:10px}
+.sb-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--green),var(--green2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sb-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--text)}
+.sb-sub{font-size:.68rem;color:var(--muted);margin-top:1px}
+.sb-user{padding:14px 20px;border-bottom:1px solid var(--border)}
+.sb-badge{display:inline-block;padding:2px 10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:20px;font-size:.68rem;font-weight:700;color:var(--blue);letter-spacing:.5px;margin-bottom:8px}
+.sb-uname{color:var(--text);font-size:.9rem;font-weight:600}
+.sb-nav{flex:1;padding:12px;overflow-y:auto}
+.nav-group{margin-bottom:18px}
+.nav-label{font-size:.63rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 8px;margin-bottom:6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all .18s;color:var(--muted);font-size:.87rem;font-weight:500;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.08));color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.nav-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+.sb-bottom{padding:14px 12px;border-top:1px solid var(--border)}
+.logout-btn{display:flex;align-items:center;gap:10px;padding:9px;border-radius:9px;color:var(--muted);font-size:.84rem;text-decoration:none;transition:all .2s;width:100%}
+.logout-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1}
+.topbar{background:var(--sidebar);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar h2{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--text)}
+.topbar p{font-size:.76rem;color:var(--muted);margin-top:1px}
+.content{padding:22px 28px}
+.tab-content{display:none;animation:fadeIn .3s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:transform .2s}
+.stat:hover{transform:translateY(-2px)}
+.stat::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.06}
+.stat.g::after{background:var(--green)}.stat.go::after{background:var(--gold)}.stat.b::after{background:var(--blue)}.stat.p::after{background:var(--purple)}.stat.r::after{background:var(--red)}
+.sl{font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:7px}
+.sv{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700}
+.stat.g .sv{color:var(--green)}.stat.go .sv{color:var(--gold)}.stat.b .sv{color:var(--blue)}.stat.p .sv{color:var(--purple)}.stat.r .sv{color:var(--red)}
+.ss{font-size:.73rem;color:var(--muted);margin-top:3px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.ct{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+th{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+td{padding:10px 0;border-bottom:1px solid rgba(42,45,62,.6);font-size:.84rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.stars{color:var(--gold);font-size:.82rem}
+
+/* FORM */
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px;font-weight:600}
+input[type=text],input[type=date],input[type=number],input[type=time],select,textarea{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical;min-height:70px}
+.btn-g{padding:9px 18px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s}
+.btn-g:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.btn-b{padding:9px 18px;background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3);border-radius:9px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.83rem;cursor:pointer;transition:all .2s}
+.btn-del{padding:5px 11px;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25);border-radius:6px;font-size:.76rem;cursor:pointer;transition:all .2s}
+.btn-del:hover{background:rgba(239,68,68,.2)}
+
+/* MEAL CONFIG */
+.meal-cfg{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px}
+.meal-cfg-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.meal-cfg-icon{font-size:1.4rem}
+.meal-cfg-name{font-weight:700;font-size:.95rem;text-transform:capitalize}
+.cfg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end}
+.cfg-grid .fg{margin-bottom:0}
+.toggle-en{display:flex;align-items:center;gap:8px}
+.switch{position:relative;width:40px;height:22px;cursor:pointer}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:22px;transition:.3s}
+.slider:before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;left:3px;top:3px;transition:.3s}
+input:checked+.slider{background:var(--green)}
+input:checked+.slider:before{transform:translateX(18px)}
+
+/* QR SCANNER */
+.scan-meal-sel{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.smeal{padding:7px 16px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:.83rem;cursor:pointer;transition:all .2s}
+.smeal.sel{background:rgba(16,185,129,.15);border-color:var(--green);color:var(--green);font-weight:700}
+#video-box{position:relative;width:100%;max-width:360px;aspect-ratio:1;margin:0 auto 16px;border-radius:16px;overflow:hidden;border:2px solid var(--border);background:#000}
+#scan-video{width:100%;height:100%;object-fit:cover}
+.scan-frame{position:absolute;inset:20%;border:2px solid var(--green);border-radius:8px;box-shadow:0 0 0 100vmax rgba(0,0,0,.5)}
+.scan-corner{position:absolute;width:22px;height:22px;border-color:var(--green);border-style:solid}
+.c-tl{top:0;left:0;border-width:3px 0 0 3px}.c-tr{top:0;right:0;border-width:3px 3px 0 0}
+.c-bl{bottom:0;left:0;border-width:0 0 3px 3px}.c-br{bottom:0;right:0;border-width:0 3px 3px 0}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanLine 2s linear infinite}
+@keyframes scanLine{0%{top:20%}100%{top:80%}}
+.scan-btns{display:flex;gap:10px;justify-content:center;margin-bottom:12px}
+#scan-result{padding:14px;border-radius:10px;margin-top:12px;text-align:center;display:none;font-weight:600}
+.sr-ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.sr-dup{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--gold)}
+.sr-err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+
+/* PROG BAR */
+.prog-row{margin-bottom:14px}
+.prog-label{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:6px}
+.prog-bar{background:var(--bg);border-radius:100px;height:7px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width .7s cubic-bezier(.16,1,.3,1)}
+
+/* ANNOUNCE */
+.ann-item{padding:12px;border-radius:10px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-left:3px solid transparent}
+.ann-item.high{background:rgba(239,68,68,.07);border-left-color:var(--red)}
+.ann-item.normal{background:rgba(59,130,246,.06);border-left-color:var(--blue)}
+.ann-title{font-weight:600;font-size:.88rem;margin-bottom:2px}
+.ann-body{font-size:.8rem;color:var(--muted)}
+
+/* WASTE */
+.waste-row td{font-size:.83rem}
+.waste-hi{color:var(--red);font-weight:700}
+.waste-lo{color:var(--green);font-weight:600}
+
+/* ALERTS */
+.ale{padding:10px 14px;border-radius:9px;margin-bottom:14px;font-size:.85rem;display:flex;gap:8px;align-items:center}
+.ale-success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green)}
+.ale-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.empty{text-align:center;color:var(--muted);font-size:.84rem;padding:20px 0}
+.chart-box{height:200px;position:relative}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card2);color:var(--text);padding:11px 18px;border-radius:11px;font-size:.84rem;font-weight:500;z-index:9999;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);border:1px solid var(--border)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="sb-icon">🍽</div>
+      <div>
+        <div class="sb-title">FeedSmart</div>
+        <div class="sb-sub">Admin Control Panel</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-badge">ADMINISTRATOR</div>
+    <div class="sb-uname">{{ u.name }}</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-group">
+      <div class="nav-label">Overview</div>
+      <button class="nav-item active" onclick="showTab('overview',this)"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-item" onclick="showTab('scanner',this)"><span class="nav-icon">📸</span>QR Scanner</button>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Management</div>
+      <button class="nav-item" onclick="showTab('config',this)"><span class="nav-icon">⚙️</span>Meal Config</button>
+      <button class="nav-item" onclick="showTab('menu',this)"><span class="nav-icon">🍛</span>Menu</button>
+      <button class="nav-item" onclick="showTab('announce',this)"><span class="nav-icon">📢</span>Announcements</button>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Analytics</div>
+      <button class="nav-item" onclick="showTab('waste',this)"><span class="nav-icon">♻️</span>Waste Estimation</button>
+      <button class="nav-item" onclick="showTab('feedback',this)"><span class="nav-icon">⭐</span>Feedback</button>
+      <button class="nav-item" onclick="showTab('students',this)"><span class="nav-icon">👥</span>Students</button>
+    </div>
+  </nav>
+  <div class="sb-bottom"><a href="/logout" class="logout-btn">🚪 <span>Sign Out</span></a></div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <h2 id="page-title">Dashboard</h2>
+      <p>{{ today }} &nbsp;·&nbsp; Main Mess</p>
+    </div>
+  </div>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}<div class="ale ale-{{cat}}">{% if cat=='success' %}✅{% else %}⚠️{% endif %} {{msg}}</div>{% endfor %}
+    {% endwith %}
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div id="tab-overview" class="tab-content active">
+      <div class="stats">
+        <div class="stat g"><div class="sl">Students</div><div class="sv">{{ total_students }}</div><div class="ss">Registered</div></div>
+        <div class="stat go"><div class="sl">Today Opt-Ins</div><div class="sv">{{ today_opt.values()|sum }}</div><div class="ss">Confirmed</div></div>
+        <div class="stat b"><div class="sl">Attendance</div><div class="sv">{{ today_att.values()|sum }}</div><div class="ss">QR scanned</div></div>
+        <div class="stat p"><div class="sl">Tomorrow</div><div class="sv">{{ tmr_opt.values()|sum }}</div><div class="ss">Pre-booked</div></div>
+        <div class="stat r"><div class="sl">Revenue</div><div class="sv">₹{{ revenue|int }}</div><div class="ss">Today</div></div>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="ct">📈 Weekly Attendance</div>
+          <div class="chart-box"><canvas id="wChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">🗓 Tomorrow Demand</div>
+          {% for cfg in configs %}
+          {% set cnt = tmr_opt.get(cfg.meal_type, 0) %}
+          <div class="prog-row">
+            <div class="prog-label">
+              <span style="text-transform:capitalize;font-weight:500;font-size:.83rem">{{ cfg.meal_type }}</span>
+              <span style="color:var(--green);font-weight:700;font-size:.83rem">{{ cnt }} / {{ total_students }}</span>
+            </div>
+            <div class="prog-bar">
+              <div class="prog-fill" style="width:{{ ((cnt/total_students)*100)|int if total_students else 0 }}%;background:var(--green)"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">✅ Today's Attendance Log</div>
+        {% if att_log %}
+        <table>
+          <tr><th>Student</th><th>Roll No</th><th>Meal</th><th>Cost</th><th>Time</th></tr>
+          {% for a in att_log %}
+          <tr>
+            <td style="font-weight:500">{{ a.sname }}</td>
+            <td style="color:var(--muted)">{{ a.roll_no }}</td>
+            <td style="text-transform:capitalize">{{ a.meal_type }}</td>
+            <td style="color:var(--green)">₹{{ a.cost_charged|int }}</td>
+            <td style="color:var(--muted)">{{ a.scanned_at.strftime('%H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}<div class="empty">No attendance recorded today</div>{% endif %}
+      </div>
+    </div>
+
+    <!-- ═══ SCANNER ═══ -->
+    <div id="tab-scanner" class="tab-content">
+      <div class="g2">
+        <div class="card">
+          <div class="ct">📸 QR Attendance Scanner</div>
+          <div class="scan-meal-sel">
+            {% for cfg in configs %}
+            <button class="smeal {% if loop.first %}sel{% endif %}" onclick="selMeal('{{cfg.meal_type}}',this)">
+              {% if cfg.meal_type=='breakfast' %}🌅{% elif cfg.meal_type=='lunch' %}☀️{% elif cfg.meal_type=='snacks' %}🫖{% else %}🌙{% endif %}
+              {{ cfg.meal_type|capitalize }}
+            </button>
+            {% endfor %}
+          </div>
+          <div id="video-box">
+            <video id="scan-video" autoplay muted playsinline></video>
+            <div class="scan-frame">
+              <div class="scan-corner c-tl"></div><div class="scan-corner c-tr"></div>
+              <div class="scan-corner c-bl"></div><div class="scan-corner c-br"></div>
+            </div>
+            <div class="scan-line" id="scan-line" style="display:none"></div>
+          </div>
+          <canvas id="qr-canvas" style="display:none"></canvas>
+          <div class="scan-btns">
+            <button class="btn-g" id="btn-start" onclick="startScan()">▶ Start Camera</button>
+            <button class="btn-del" id="btn-stop" style="display:none" onclick="stopScan()">■ Stop</button>
+          </div>
+          <div id="scan-result"></div>
+        </div>
+        <div class="card">
+          <div class="ct">📋 Scan Guide</div>
+          <div style="font-size:.83rem;color:var(--muted);line-height:2.1">
+            <p>1️⃣ Select meal type above</p>
+            <p>2️⃣ Click <strong style="color:var(--green)">Start Camera</strong></p>
+            <p>3️⃣ Student shows QR on phone</p>
+            <p>4️⃣ Hold in green frame area</p>
+            <p>5️⃣ Auto-scans — no tap needed</p>
+            <p>6️⃣ Meal cost auto-deducted</p>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="ct" style="margin-bottom:10px">🎨 Result Colors</div>
+            <div style="font-size:.8rem;line-height:2.2">
+              <span style="color:var(--green)">● Green</span> = New scan, attendance marked<br>
+              <span style="color:var(--gold)">● Yellow</span> = Already scanned today<br>
+              <span style="color:var(--red)">● Red</span> = Error or invalid QR
+            </div>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="ct" style="margin-bottom:10px">💰 Meal Costs</div>
+            {% for cfg in configs %}
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(42,45,62,.4)">
+              <span style="text-transform:capitalize">{{ cfg.meal_type }}</span>
+              <strong style="color:var(--green)">₹{{ cfg.cost|int }}</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MEAL CONFIG ═══ -->
+    <div id="tab-config" class="tab-content">
+      <div class="card">
+        <div class="ct">⚙️ Meal Configuration</div>
+        <form method="POST" action="/admin/config">
+          <input type="hidden" name="action" value="save">
+          {% set meal_icons = {'breakfast':'🌅','lunch':'☀️','snacks':'🫖','dinner':'🌙'} %}
+          {% for mt in ['breakfast','lunch','snacks','dinner'] %}
+          {% set cfg = config_dict.get(mt, {}) %}
+          <div class="meal-cfg">
+            <div class="meal-cfg-header">
+              <span class="meal-cfg-icon">{{ meal_icons[mt] }}</span>
+              <span class="meal-cfg-name">{{ mt }}</span>
+              <div class="toggle-en" style="margin-left:auto">
+                <label class="switch">
+                  <input type="checkbox" name="{{ mt }}_enabled" {% if cfg.get('enabled',1) %}checked{% endif %}>
+                  <span class="slider"></span>
+                </label>
+                <span style="font-size:.8rem;color:var(--muted)">Enabled</span>
+              </div>
+            </div>
+            <div class="cfg-grid">
+              <div class="fg"><label>Start Time</label><input type="time" name="{{ mt }}_start" value="{{ cfg.get('start_time','08:00') }}"></div>
+              <div class="fg"><label>End Time</label><input type="time" name="{{ mt }}_end" value="{{ cfg.get('end_time','09:30') }}"></div>
+              <div class="fg"><label>Opt-in Cutoff</label><input type="time" name="{{ mt }}_cutoff" value="{{ cfg.get('cutoff_time','07:30') }}"></div>
+              <div class="fg"><label>Cost (₹)</label><input type="number" name="{{ mt }}_cost" value="{{ cfg.get('cost',50)|int }}" min="0" step="1"></div>
+              <div class="fg"><label>Description</label><input type="text" name="{{ mt }}_desc" value="{{ cfg.get('description','') }}" placeholder="Menu preview..."></div>
+            </div>
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn-g">Save Configuration →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══ MENU ═══ -->
+    <div id="tab-menu" class="tab-content">
+      <div class="card">
+        <div class="ct">🍛 Add Menu Entry</div>
+        <form method="POST" action="/admin/menu" style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end">
+          <input type="hidden" name="action" value="add">
+          <div class="fg" style="margin:0"><label>Date</label><input type="date" name="date" required></div>
+          <div class="fg" style="margin:0"><label>Meal</label>
+            <select name="meal_type">
+              {% for cfg in configs %}<option value="{{ cfg.meal_type }}">{{ cfg.meal_type|capitalize }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="fg" style="margin:0"><label>Items</label><input type="text" name="items" placeholder="Rice, Dal, Curry..." required></div>
+          <button type="submit" class="btn-g" style="height:38px;white-space:nowrap">+ Add</button>
+        </form>
+      </div>
+      <div class="card">
+        <div class="ct">📋 Upcoming Menu</div>
+        <table>
+          <tr><th>Date</th><th>Meal</th><th>Items</th><th></th></tr>
+          {% for m in menus %}
+          <tr>
+            <td>{{ m.date }}</td>
+            <td style="text-transform:capitalize;color:var(--muted)">{{ m.meal_type }}</td>
+            <td style="color:var(--muted);font-size:.8rem">{{ m['items'] }}</td>
+            <td>
+              <form method="POST" action="/admin/menu" style="display:inline">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="menu_id" value="{{ m.id }}">
+                <button type="submit" class="btn-del">✕</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}<tr><td colspan="4" class="empty">No menu entries</td></tr>{% endfor %}
+        </table>
+      </div>
+    </div>
+    <!-- ═══ WASTE ═══ -->
+    <div id="tab-waste" class="tab-content">
+      <div class="card">
+        <div class="ct">♻️ Today's Waste Estimation</div>
+        <table class="waste-row">
+          <tr><th>Meal</th><th>Opted In</th><th>Attended</th><th>Prepared</th><th>Estimated Waste</th><th>Waste %</th></tr>
+          {% for cfg in configs %}
+          {% set mt = cfg.meal_type %}
+          {% set opt = today_opt.get(mt,0) %}
+          {% set att = today_att.get(mt,0) %}
+          {% set prep = opt + 10 %}
+          {% set waste = [0, prep - att]|max %}
+          {% set pct = ((waste/prep)*100)|int if prep else 0 %}
+          <tr>
+            <td style="font-weight:600;text-transform:capitalize">{{ mt }}</td>
+            <td style="color:var(--gold)">{{ opt }}</td>
+            <td style="color:var(--blue)">{{ att }}</td>
+            <td style="color:var(--muted)">{{ prep }}</td>
+            <td class="{{ 'waste-hi' if waste>8 else 'waste-lo' }}">{{ waste }} plates</td>
+            <td class="{{ 'waste-hi' if pct>20 else 'waste-lo' }}">{{ pct }}%</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div class="card">
+        <div class="ct">💡 Reduction Tips</div>
+        <div style="font-size:.84rem;color:var(--muted);line-height:2.2">
+          <p>• Prepare food = <strong style="color:var(--text)">Opt-ins + 10% buffer</strong></p>
+          <p>• Enforce opt-in cutoff strictly — last-minute changes cause waste</p>
+          <p>• Review tomorrow's demand before cooking today</p>
+          <p>• High-waste meals → reduce quantity next cycle</p>
+          <p>• Track patterns weekly using the attendance trend chart</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FEEDBACK ═══ -->
+    <div id="tab-feedback" class="tab-content">
+      <div class="g2">
+        <div class="card">
+          <div class="ct">📊 Feedback Analytics</div>
+          {% for r in fb_stats %}
+          <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
+            <div style="font-weight:700;text-transform:capitalize;margin-bottom:8px;font-size:.9rem">{{ r.meal_type }}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.8rem">
+              <span style="color:var(--muted)">Overall: <span style="color:var(--gold)">{{ r.ar }}★</span></span>
+              <span style="color:var(--muted)">Taste: <span style="color:var(--gold)">{{ r.at }}★</span></span>
+              <span style="color:var(--muted)">Quantity: <span style="color:var(--gold)">{{ r.aq }}★</span></span>
+              <span style="color:var(--muted)">Cleanliness: <span style="color:var(--gold)">{{ r.ac }}★</span></span>
+            </div>
+          </div>
+          {% else %}<div class="empty">No feedback yet</div>{% endfor %}
+        </div>
+        <div class="card">
+          <div class="ct">💬 Recent Feedback</div>
+          <table>
+            <tr><th>Student</th><th>Meal</th><th>Rating</th></tr>
+            {% for fb in feedbacks %}
+            <tr>
+              <td>{{ fb.sname }}<br><span style="font-size:.72rem;color:var(--muted)">{{ fb.comment[:35] if fb.comment else '' }}</span></td>
+              <td style="color:var(--muted);font-size:.78rem;text-transform:capitalize">{{ fb.meal_type }}<br>{{ fb.date }}</td>
+              <td class="stars">{{ '★'*fb.rating }}</td>
+            </tr>
+            {% else %}<tr><td colspan="3" class="empty">No feedback</td></tr>{% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ANNOUNCEMENTS ═══ -->
+    <div id="tab-announce" class="tab-content">
+      <div class="g2">
+        <div class="card">
+          <div class="ct">📢 Post Announcement</div>
+          <form method="POST" action="/admin/announce">
+            <div class="fg"><label>Title</label><input type="text" name="title" placeholder="Announcement title" required></div>
+            <div class="fg"><label>Message</label><textarea name="body" placeholder="Write your message..." required></textarea></div>
+            <div class="fg"><label>Priority</label>
+              <select name="priority"><option value="normal">Normal</option><option value="high">High ⚠️</option></select>
+            </div>
+            <button type="submit" class="btn-g">Post →</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="ct">📋 Active Announcements</div>
+          {% for a in anns %}
+          <div class="ann-item {{ a.priority }}">
+            <div>
+              <div class="ann-title">{% if a.priority=='high' %}🔴{% else %}🔵{% endif %} {{ a.title }}</div>
+              <div class="ann-body">{{ a.body }}</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:3px">{{ a.created_at.strftime('%Y-%m-%d') }}</div>
+            </div>
+            <form method="POST" action="/admin/announce/delete">
+              <input type="hidden" name="ann_id" value="{{ a.id }}">
+              <button type="submit" class="btn-del">✕</button>
+            </form>
+          </div>
+          {% else %}<div class="empty">No announcements</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+<!-- ═══ STUDENTS ═══ -->
+<div id="tab-students" class="tab-content">
+
+  <!-- 🔥 INLINE STYLE -->
+  <style>
+    .student-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .student-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    /* 🔥 FIX MIXING ISSUE */
+    .student-table {
+      width: 100%;
+      table-layout: fixed; /* ⭐ MOST IMPORTANT */
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .student-table th {
+      background: linear-gradient(135deg,#1976d2,#0d47a1);
+      color: white;
+      padding: 12px;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .student-table td {
+      padding: 10px;
+      font-size: 0.85rem;
+      color:black;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap; /* ⭐ prevents overlap */
+      border-bottom: 1px solid #eee;
+    }
+
+    .student-table tr:nth-child(even) {
+      background: #f7f9fc;
+    }
+
+    .student-table tr:hover {
+      background: #e3f2fd;
+    }
+
+    /* 🔥 COLUMN WIDTH FIX */
+    .student-table th:nth-child(1),
+    .student-table td:nth-child(1) { width: 18%; }
+
+    .student-table th:nth-child(2),
+    .student-table td:nth-child(2) { width: 18%; }
+
+    .student-table th:nth-child(3),
+    .student-table td:nth-child(3) { width: 18%; }
+
+    .student-table th:nth-child(4),
+    .student-table td:nth-child(4) { width: 15%; }
+
+    .student-table th:nth-child(5),
+    .student-table td:nth-child(5) { width: 12%; }
+
+    .student-table th:nth-child(6),
+    .student-table td:nth-child(6) { width: 12%; }
+
+    .student-table th:nth-child(7),
+    .student-table td:nth-child(7) { width: 7%; }
+
+    /* BADGES */
+    .badge {
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .hosteller {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .dayscholar {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+
+    /* AMOUNT */
+    .amount {
+      font-weight: 700;
+      color: #2e7d32;
+    }
+
+    /* BUTTONS */
+    .btn {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg,#4caf50,#2e7d32);
+      color: white;
+    }
+
+    .btn-del {
+      background: linear-gradient(135deg,#ff5252,#d32f2f);
+      color: white;
+    }
+
+    /* FORM ALIGN */
+    .student-table form {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    /* INPUT */
+    input[type="number"] {
+      width: 60px;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+
+  <div class="student-card">
+
+    <div class="student-title">👥 Student Management</div>
+
+    <table class="student-table">
+
+      <tr>
+        <th>Name</th>
+        <th>Roll No</th>
+        <th>Phone</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Top Up</th>
+        <th>Delete</th>
+      </tr>
+
+      {% for s in students %}
+      <tr>
+
+        <td title="{{ s.name }}"><b>{{ s.name }}</b></td>
+
+        <td>{{ s.roll_no }}</td>
+
+        <td>{{ s.phone or '—' }}</td>
+
+        <td>
+          {% if s.user_type == 'hosteller' %}
+            <span class="badge hosteller">🏨 Hosteller</span>
+          {% else %}
+            <span class="badge dayscholar">🎓 Day Scholar</span>
+          {% endif %}
+        </td>
+
+        <td class="amount">
+          {% if s.user_type == 'dayscholar' %}
+            ₹{{ '%.0f'|format(s.mess_balance) }}
+          {% else %}
+            ₹{{ '%.0f'|format(s.monthly_bill) }}
+          {% endif %}
+        </td>
+
+        <!-- TOPUP -->
+        <td>
+          <form method="POST" action="/admin/topup">
+            <input type="hidden" name="user_id" value="{{ s.id }}">
+            <input type="number" name="amount" placeholder="₹" min="1">
+            <button type="submit" class="btn btn-add">Add</button>
+          </form>
+        </td>
+
+        <!-- DELETE -->
+        <td>
+          <form method="POST" action="/admin/delete_student"
+                onsubmit="return confirm('Delete this student?')">
+            <input type="hidden" name="user_id" value="{{ s.id }}">
+            <button type="submit" class="btn btn-del">🗑</button>
+          </form>
+        </td>
+
+      </tr>
+      {% endfor %}
+
+    </table>
+
+  </div>
+</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  const titles={overview:'Dashboard',scanner:'QR Scanner',config:'Meal Config',menu:'Menu Management',waste:'Waste Estimation',feedback:'Feedback',announce:'Announcements',students:'Students'};
+  document.getElementById('page-title').textContent=titles[name]||'Dashboard';
+}
+
+// Chart
+const wData = {{ weekly|tojson }};
+const ctx = document.getElementById('wChart').getContext('2d');
+new Chart(ctx,{type:'bar',data:{labels:wData.map(d=>d.date),datasets:[{label:'Attendance',data:wData.map(d=>d.count),backgroundColor:'rgba(16,185,129,.25)',borderColor:'#10b981',borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10}},beginAtZero:true}}}});
+
+// QR Scanner
+let selMealType = '{{ configs[0].meal_type if configs else "breakfast" }}';
+let stream=null, scanning=false, scanInterval=null;
+
+function selMeal(m,btn){
+  selMealType=m;
+  document.querySelectorAll('.smeal').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+async function startScan(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    document.getElementById('scan-video').srcObject=stream;
+    document.getElementById('btn-start').style.display='none';
+    document.getElementById('btn-stop').style.display='inline-block';
+    document.getElementById('scan-line').style.display='block';
+    scanning=true;
+    scanInterval=setInterval(scanFrame,300);
+  }catch(e){showResult('err','❌ Camera access denied. Allow camera permission.');}
+}
+
+function stopScan(){
+  scanning=false; clearInterval(scanInterval);
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  document.getElementById('btn-start').style.display='inline-block';
+  document.getElementById('btn-stop').style.display='none';
+  document.getElementById('scan-line').style.display='none';
+}
+
+function scanFrame(){
+  if(!scanning)return;
+  const v=document.getElementById('scan-video');
+  const c=document.getElementById('qr-canvas');
+  if(v.readyState!==v.HAVE_ENOUGH_DATA)return;
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  const ctx=c.getContext('2d');ctx.drawImage(v,0,0,c.width,c.height);
+  const img=ctx.getImageData(0,0,c.width,c.height);
+  const code=jsQR(img.data,img.width,img.height);
+  if(code){scanning=false;clearInterval(scanInterval);processQR(code.data);}
+}
+
+async function processQR(qd){
+  try{
+    const res=await fetch('/admin/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({qr_data:qd,meal_type:selMealType})});
+    const data=await res.json();
+    if(data.duplicate)showResult('dup',data.message);
+    else if(data.success)showResult('ok',`${data.message}\n₹${data.cost} deducted · Balance: ₹${data.new_balance.toFixed(0)}`);
+    else showResult('err',data.error||'Unknown error');
+  }catch(e){showResult('err','❌ Scan failed');}
+  setTimeout(()=>{if(stream){scanning=true;scanInterval=setInterval(scanFrame,300);}},2500);
+}
+
+function showResult(type,msg){
+  const el=document.getElementById('scan-result');
+  el.style.display='block';
+  el.className=type==='ok'?'sr-ok':type==='dup'?'sr-dup':'sr-err';
+  el.innerHTML=msg.replace('\n','<br>');
+  toast(msg.split('\n')[0],type==='ok'?'success':'error');
+}
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+</script>
+</body></html>
