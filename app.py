@@ -10,15 +10,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = 'feedsmart_v3_ultra_2026'
 
-# ── MySQL CONFIG — update password if needed ─────────────────────────────────
-def db():
-    return mysql.connector.connect(
-        host=os.environ.get("MYSQLHOST"),
-        port=int(os.environ.get("MYSQLPORT", 3306)),
-        user=os.environ.get("MYSQLUSER"),
-        password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQLDATABASE")
-    )
 # ── DB HELPERS ───────────────────────────────────────────────────────────────
 def db():
     import mysql.connector
@@ -95,19 +86,7 @@ def send_otp_email(to_email, otp):
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
 def init_db():
-    # Step 1: create database
-    base = mysql.connector.connect(
-        host=DB_CONFIG['host'],
-        port=DB_CONFIG['port'],
-        user=DB_CONFIG['user'],
-        password=DB_CONFIG['password']
-    )
-    cur = base.cursor()
-    cur.execute("CREATE DATABASE IF NOT EXISTS railway")
-    base.commit()
-    base.close()
 
-    # Step 2: create tables
     conn = db()
     cur = conn.cursor()
 
@@ -935,7 +914,4 @@ def verify_otp():
         return jsonify({'success': False})
 
 
-app = Flask(__name__)
-app.secret_key = 'feedsmart_v3_ultra_2026'
-
-init_db()
+init_db()   # ✅ correct
