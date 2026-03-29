@@ -231,6 +231,45 @@ textarea:focus{border-color:var(--green)}
   background: rgba(0,0,0,0.5);
   z-index: 150;
 }
+@media (max-width:768px){
+
+  /* 🔥 Make everything single column */
+  .g2,
+  .g3 {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Stats also stack */
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Weekly meals stack */
+  .week-meals {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Wallet cards stack */
+  .wallet-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Reduce padding for small screen */
+  .content {
+    padding: 16px;
+  }
+
+  /* 🔥 Cards tighter */
+  .card {
+    padding: 16px;
+  }
+
+  /* 🔥 QR smaller */
+  #qrcode canvas {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
 </style>
 </head>
 <body>

@@ -181,6 +181,45 @@ input:checked+.slider:before{transform:translateX(18px)}
   background: rgba(0,0,0,0.5);
   z-index: 150;
 }
+@media (max-width:768px){
+
+  /* 🔥 Make everything single column */
+  .g2,
+  .g3 {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Stats also stack */
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Weekly meals stack */
+  .week-meals {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Wallet cards stack */
+  .wallet-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* 🔥 Reduce padding for small screen */
+  .content {
+    padding: 16px;
+  }
+
+  /* 🔥 Cards tighter */
+  .card {
+    padding: 16px;
+  }
+
+  /* 🔥 QR smaller */
+  #qrcode canvas {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -737,10 +776,6 @@ input:checked+.slider:before{transform:translateX(18px)}
 </main>
 
 <div class="toast" id="toast"></div>
-  </table>
-</div>
-
-
 
 <script>
 function showTab(name, btn) {
@@ -830,15 +865,6 @@ function toggleSidebar() {
 
   sidebar.classList.toggle("active");
   overlay.classList.toggle("active");
-}
-function showTab(name, btn) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
-
-  document.getElementById('page-title').innerText = btn.innerText.trim();
 }
 </script>
 </body></html>
