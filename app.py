@@ -14,23 +14,13 @@ app.secret_key = 'feedsmart_v3_ultra_2026'
 def db():
     import mysql.connector
     import os
-    from urllib.parse import urlparse
-
-    url = os.environ.get("MYSQL_URL")
-    parsed = urlparse(url)
-
-    password = parsed.password
-
-    # 🔥 FIX: convert bytes → string
-    if isinstance(password, bytes):
-        password = password.decode()
 
     return mysql.connector.connect(
-        host=parsed.hostname,
-        port=parsed.port or 3306,
-        user=parsed.username,
-        password=password,   # ✅ fixed
-        database=parsed.path[1:]
+        host=os.environ.get("MYSQLHOST"),
+        port=int(os.environ.get("MYSQLPORT", 3306)),
+        user=os.environ.get("MYSQLUSER"),
+        password=os.environ.get("MYSQLPASSWORD"),
+        database=os.environ.get("MYSQL_DATABASE")
     )
 
 def qr(conn, sql, params=()):
