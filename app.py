@@ -12,12 +12,11 @@ app.secret_key = 'feedsmart_v3_ultra_2026'
 
 # ── MySQL CONFIG — update password if needed ─────────────────────────────────
 DB_CONFIG = {
-    'host': os.environ.get('MYSQLHOST', 'mysql.railway.internal'),
-    'port': int(os.environ.get('MYSQLPORT', 3306)),
-    'user': os.environ.get('MYSQLUSER', 'root'),
-    'password': os.environ.get('MYSQLPASSWORD'),   # ← from Railway
-    'database': os.environ.get('MYSQLDATABASE', 'railway'),
-    'autocommit': False
+    'host': 'mysql.railway.internal',
+    'port': 3306,
+    'user': 'root',
+    'password': 'XtHnZYBchEkzyNkuNbkznfGCSOeINrKx',
+    'database': 'railway'
 }
 # ── DB HELPERS ───────────────────────────────────────────────────────────────
 def db():
@@ -79,6 +78,7 @@ def init_db():
     # Step 1: create database
     base = mysql.connector.connect(
         host=DB_CONFIG['host'],
+        port=DB_CONFIG['port'],
         user=DB_CONFIG['user'],
         password=DB_CONFIG['password']
     )
