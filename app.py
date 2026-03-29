@@ -900,11 +900,9 @@ def send_otp():
     session['otp'] = otp
     session['otp_email'] = email
 
-    try:
-        send_otp_email(email, otp)
-        return jsonify({'msg': 'OTP sent'})
-    except Exception as e:
-        return jsonify({'error': 'Email failed but OTP generated'}), 200
+    print("OTP:", otp)  # 🔥 use this
+
+    return jsonify({'msg': 'OTP generated'})
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
