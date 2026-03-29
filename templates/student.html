@@ -945,32 +945,51 @@ new QRCode(document.getElementById("qrcode"), {
   correctLevel: QRCode.CorrectLevel.M
 });
 
+
+// ✅ TAB SWITCH (MAIN FIX)
 function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+  const activeTab = document.getElementById('tab-' + name);
+  if(activeTab){
+    activeTab.classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const titles = {
+    home:'Dashboard',
+    weekly:'Weekly Menu',
+    qr:'My QR Code',
+    feedback:'Feedback',
+    wallet:'Wallet',
+    bill:'Monthly Bill'
+  };
+
+  document.getElementById('page-title').textContent = titles[name] || 'Dashboard';
+
+  // 📱 Mobile auto close
+  if (window.innerWidth <= 768) {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+  }
+}
+
+// ✅ TOAST
 function toast(msg, type='success') {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast '+type;
-  setTimeout(() => t.classList.add('show'), 10);
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.textContent = msg;
+  t.className = 'toast '+type;
+
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
-}
-async function setOptin(mealDate, meal, status, btn) {
-  try {
-    const res = await fetch('/optin', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:mealDate,meal_type:meal,status})});
-    const data = await res.json();
-    if(data.cutoff) { toast('⏰ Cutoff time passed!','error'); return; }
-    if(data.success) {
-      const prefix = mealDate === '{{ today }}' ? '-t-' : '-';
-      ['in','out'].forEach(s => {
-        const b = document.getElementById(`btn-${s}${prefix}${meal}`);
-        if(b) b.className = 'tbtn';
-      });
-      const target = document.getElementById(`btn-${status}${prefix}${meal}`);
-      if(target) target.className = 'tbtn ' + status;
-      const cntEl = document.getElementById(`cnt${prefix}${meal}`);
-      if(cntEl) cntEl.textContent = data.count + ' opted in';
-      toast(status === 'in' ? `✓ Opted in for ${meal}` : `✗ Opted out of ${meal}`);
-    }
-  } catch(e) { toast('Something went wrong','error'); }
+
+// ✅ SIDEBAR
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("active");
+  document.getElementById("overlay").classList.toggle("active");
 }
 
 function setRating(v) {
