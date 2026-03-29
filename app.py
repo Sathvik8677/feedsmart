@@ -25,12 +25,11 @@ def db():
     from urllib.parse import urlparse
 
     url = os.environ.get("MYSQL_URL")
-
     parsed = urlparse(url)
 
     return mysql.connector.connect(
         host=parsed.hostname,
-        port=parsed.port,
+        port=parsed.port or 3306,   # 🔥 FIX HERE
         user=parsed.username,
         password=parsed.password,
         database=parsed.path[1:]
