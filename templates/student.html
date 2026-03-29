@@ -952,7 +952,7 @@ function toast(msg, type='success') {
   setTimeout(() => t.classList.add('show'), 10);
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
+}
 async function setOptin(mealDate, meal, status, btn) {
   try {
     const res = await fetch('/optin', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:mealDate,meal_type:meal,status})});
