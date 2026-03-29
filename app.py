@@ -20,7 +20,7 @@ def db():
         port=int(os.environ.get("MYSQLPORT", 3306)),
         user=os.environ.get("MYSQLUSER"),
         password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQL_DATABASE")
+        database=os.environ.get("MYSQLDATABASE")
     )
 
 def qr(conn, sql, params=()):
