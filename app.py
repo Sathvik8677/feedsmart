@@ -20,7 +20,21 @@ DB_CONFIG = {
 }
 # ── DB HELPERS ───────────────────────────────────────────────────────────────
 def db():
-    return mysql.connector.connect(**DB_CONFIG)
+    import mysql.connector
+    import os
+    from urllib.parse import urlparse
+
+    url = os.environ.get("MYSQL_URL")
+
+    parsed = urlparse(url)
+
+    return mysql.connector.connect(
+        host=parsed.hostname,
+        port=parsed.port,
+        user=parsed.username,
+        password=parsed.password,
+        database=parsed.path[1:]
+    )
 
 def qr(conn, sql, params=()):
     cur = conn.cursor(dictionary=True)
@@ -83,7 +97,7 @@ def init_db():
         password=DB_CONFIG['password']
     )
     cur = base.cursor()
-    cur.execute("CREATE DATABASE IF NOT EXISTS feedsmart")
+    cur.execute("CREATE DATABASE IF NOT EXISTS railway")
     base.commit()
     base.close()
 
