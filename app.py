@@ -889,16 +889,23 @@ def send_otp():
     session['otp'] = otp
     session['otp_email'] = email
 
-    print("OTP:", otp)  # 🔥 use this
+    print("OTP:", otp)
 
-    return jsonify({'msg': 'OTP generated'})
+    return jsonify({
+        'success': True,
+        'otp': otp   # 🔥 IMPORTANT
+    })
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
 
-    if user_otp == session.get('otp'):
+    if user_otp and user_otp == session.get('otp'):
         session['otp_verified'] = True
+
+        session.pop('otp', None)
+        session.pop('otp_email', None)
+
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})

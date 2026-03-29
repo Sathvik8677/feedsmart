@@ -167,12 +167,17 @@ function sendOTP(){
     method:'POST',
     body: formData
   })
-  .then(r=>r.json())
-  .then(d=>{
+.then(d=>{
     showMessage("OTP Sent ✅", "green");
+
+    // 🔥 SHOW OTP TO USER
+    if(d.otp){
+        showMessage("Your OTP is: " + d.otp, "green");
+    }
+
     btn.innerHTML = "Resend OTP";
     btn.disabled = false;
-  })
+})
   .catch(()=>{
     showMessage("Error ❌", "red");
     btn.innerHTML = "Send OTP";
