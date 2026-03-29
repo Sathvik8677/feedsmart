@@ -168,11 +168,14 @@ function sendOTP(){
     body: formData
   })
 .then(d=>{
+    console.log("Response:", d);  // 🔥 DEBUG
+
     showMessage("OTP Sent ✅", "green");
 
-    // 🔥 SHOW OTP TO USER
+    // 🔥 SHOW OTP ON SCREEN
     if(d.otp){
-        showMessage("Your OTP is: " + d.otp, "green");
+        document.getElementById("otpStatus").innerText =
+            "Your OTP is: " + d.otp;
     }
 
     btn.innerHTML = "Resend OTP";
