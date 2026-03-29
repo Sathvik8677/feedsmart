@@ -69,7 +69,7 @@ def send_otp_email(to_email, otp):
     msg['From'] = sender
     msg['To'] = to_email
 
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10)
     server.login(sender, password)
     server.send_message(msg)
     server.quit()
@@ -895,15 +895,16 @@ def delete_student():
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
     email = request.form.get('email')
-
     otp = str(random.randint(100000, 999999))
 
     session['otp'] = otp
     session['otp_email'] = email
 
-    send_otp_email(email, otp)
-
-    return jsonify({'msg': 'OTP sent'})
+    try:
+        send_otp_email(email, otp)
+        return jsonify({'msg': 'OTP sent'})
+    except Exception as e:
+        return jsonify({'error': 'Email failed but OTP generated'}), 200
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
