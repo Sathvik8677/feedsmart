@@ -58,7 +58,10 @@ def is_past_cutoff(cutoff_time):
     except:
         return False
 def send_otp_email(to_email, otp):
-    sender   = os.environ.get('GMAIL_USER')
+    import os, smtplib
+    from email.mime.text import MIMEText
+
+    sender = os.environ.get('GMAIL_USER')
     password = os.environ.get('GMAIL_PASS')
 
     msg = MIMEText(f"Your FeedSmart OTP is: {otp}")
@@ -66,9 +69,9 @@ def send_otp_email(to_email, otp):
     msg['From'] = sender
     msg['To'] = to_email
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
     server.login(sender, password)
+```python
     server.send_message(msg)
     server.quit()
 
