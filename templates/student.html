@@ -233,41 +233,47 @@ textarea:focus{border-color:var(--green)}
 }
 @media (max-width:768px){
 
-  /* 🔥 Make everything single column */
+  /* 🔥 Stack all grids */
   .g2,
   .g3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Stats also stack */
+  /* 🔥 Stats (4 → 1 column) */
   .stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Weekly meals stack */
+  /* 🔥 Weekly meals */
   .week-meals {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Wallet cards stack */
+  /* 🔥 Wallet section */
   .wallet-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Reduce padding for small screen */
+  /* 🔥 Reduce spacing */
   .content {
-    padding: 16px;
+    padding: 15px !important;
   }
 
-  /* 🔥 Cards tighter */
   .card {
-    padding: 16px;
+    padding: 15px !important;
   }
 
-  /* 🔥 QR smaller */
+  /* 🔥 QR size adjust */
   #qrcode canvas {
     width: 150px !important;
     height: 150px !important;
+  }
+
+  /* 🔥 Table scroll fix */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }
 </style>

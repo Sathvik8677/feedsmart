@@ -183,41 +183,47 @@ input:checked+.slider:before{transform:translateX(18px)}
 }
 @media (max-width:768px){
 
-  /* 🔥 Make everything single column */
+  /* 🔥 STACK ALL GRIDS */
   .g2,
   .g3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Stats also stack */
+  /* 🔥 STATS FIX */
   .stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* 🔥 Weekly meals stack */
-  .week-meals {
-    grid-template-columns: 1fr;
-  }
-
-  /* 🔥 Wallet cards stack */
-  .wallet-actions {
-    grid-template-columns: 1fr;
-  }
-
-  /* 🔥 Reduce padding for small screen */
-  .content {
-    padding: 16px;
-  }
-
-  /* 🔥 Cards tighter */
+  /* 🔥 CARDS SMALLER */
   .card {
-    padding: 16px;
+    padding: 15px !important;
   }
 
-  /* 🔥 QR smaller */
-  #qrcode canvas {
-    width: 150px !important;
-    height: 150px !important;
+  /* 🔥 MAIN CONTENT */
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .content {
+    padding: 15px !important;
+  }
+
+  /* 🔥 TABLE SCROLL */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* 🔥 BUTTON FULL WIDTH (better UX) */
+  .btn {
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  /* 🔥 INPUT FULL WIDTH */
+  input, select {
+    width: 100%;
   }
 }
 </style>
