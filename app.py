@@ -11,13 +11,14 @@ app = Flask(__name__)
 app.secret_key = 'feedsmart_v3_ultra_2026'
 
 # ── MySQL CONFIG — update password if needed ─────────────────────────────────
-DB_CONFIG = {
-    'host': 'mysql.railway.internal',
-    'port': 3306,
-    'user': 'root',
-    'password': 'XtHnZYBchEkzyNkuNbkznfGCSOeINrKx',
-    'database': 'railway'
-}
+def db():
+    return mysql.connector.connect(
+        host=os.environ.get("MYSQLHOST"),
+        port=int(os.environ.get("MYSQLPORT", 3306)),
+        user=os.environ.get("MYSQLUSER"),
+        password=os.environ.get("MYSQLPASSWORD"),
+        database=os.environ.get("MYSQLDATABASE")
+    )
 # ── DB HELPERS ───────────────────────────────────────────────────────────────
 def db():
     import mysql.connector
