@@ -936,4 +936,57 @@ def verify_otp():
     else:
         return jsonify({'success': False})
 
+@app.route('/forgot_send_otp', methods=['POST'])
+def forgot_send_otp():
+    email = request.form.get('email')
+
+    conn = db()
+    user = q1(conn, "SELECT id FROM users WHERE email=%s", (email,))
+    conn.close()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Email not found'})
+
+    otp = str(random.randint(100000, 999999))
+
+    session['reset_otp'] = otp
+    session['reset_email'] = email
+    session['reset_time'] = datetime.now()
+
+    send_otp_email(email, otp)
+
+    return jsonify({'success': True})
+
+@app.route('/forgot_verify_otp', methods=['POST'])
+def forgot_verify_otp():
+    otp = request.form.get('otp')
+
+    if datetime.now() - session['reset_time'] > timedelta(minutes=5):
+        return jsonify({'success': False, 'message': 'OTP expired'})
+
+    if otp == session.get('reset_otp'):
+        session['reset_verified'] = True
+        return jsonify({'success': True})
+
+    return jsonify({'success': False})
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    if not session.get('reset_verified'):
+        return jsonify({'success': False})
+
+    new_password = request.form.get('password')
+    email = session.get('reset_email')
+
+    conn = db()
+    qx(conn, "UPDATE users SET password=%s WHERE email=%s",
+       (hp(new_password), email))
+    conn.commit()
+    conn.close()
+
+    session.clear()
+
+    return jsonify({'success': True})
+
+
 init_db()   # ✅ correct
