@@ -6,7 +6,6 @@ import smtplib, random
 import requests
 from datetime import datetime, date, timedelta
 from email.mime.text import MIMEText
-load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'feedsmart_v3_ultra_2026'
