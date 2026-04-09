@@ -3,6 +3,7 @@ import mysql.connector
 from dotenv import load_dotenv
 import hashlib, json, os, uuid
 import smtplib, random
+import requests
 from datetime import datetime, date, timedelta
 from email.mime.text import MIMEText
 load_dotenv()
@@ -57,22 +58,21 @@ def is_past_cutoff(cutoff_time):
         return now >= cutoff
     except:
         return False
+
 def send_otp_email(to_email, otp):
-    import os, smtplib
-    from email.mime.text import MIMEText
+    api_key = os.getenv("MAILGUN_API_KEY")
+    domain = os.getenv("MAILGUN_DOMAIN")
 
-    sender = os.environ.get('GMAIL_USER')
-    password = os.environ.get('GMAIL_PASS')
-
-    msg = MIMEText(f"Your FeedSmart OTP is: {otp}")
-    msg['Subject'] = "FeedSmart OTP"
-    msg['From'] = sender
-    msg['To'] = to_email
-
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10)
-    server.login(sender, password)
-    server.send_message(msg)
-    server.quit()
+    return requests.post(
+        f"https://api.mailgun.net/v3/{domain}/messages",
+        auth=("api", api_key),
+        data={
+            "from": f"FeedSmart <postmaster@{domain}>",
+            "to": [to_email],
+            "subject": "Your OTP Code",
+            "text": f"Your FeedSmart OTP is: {otp}"
+        }
+    )
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
 def init_db():
@@ -885,28 +885,28 @@ def delete_student():
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
     email = request.form.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+
     otp = str(random.randint(100000, 999999))
 
+    # store in session
     session['otp'] = otp
     session['otp_email'] = email
 
-    print("OTP:", otp)
-
-    return jsonify({
-        'success': True,
-        'otp': otp   # 🔥 IMPORTANT
-    })
-
+    try:
+        send_otp_email(email, otp)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
 
-    if user_otp and user_otp == session.get('otp'):
+    if user_otp == session.get('otp'):
         session['otp_verified'] = True
-
-        session.pop('otp', None)
-
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})

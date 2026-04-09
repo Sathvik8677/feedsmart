@@ -87,6 +87,10 @@ button:hover {
     opacity: 1;
   }
 }
+#registerBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 </style>
 </style>
 </head>
@@ -204,20 +208,19 @@ function sendOTP(){
     method:'POST',
     body: formData
   })
-  .then(res => res.json())   // 🔥 FIX HERE
+  .then(res => res.json())
   .then(d=>{
-    showMessage("OTP Sent ✅", "green");
-
-    if(d.otp){
-      document.getElementById("otpStatus").innerText =
-        "Your OTP is: " + d.otp;
+    if(d.success){
+      showMessage("OTP sent to your email 📩", "green");
+    } else {
+      showMessage("Failed to send OTP ❌", "red");
     }
 
     btn.innerHTML = "Resend OTP";
     btn.disabled = false;
   })
   .catch(()=>{
-    showMessage("Error ❌", "red");
+    showMessage("Server Error ❌", "red");
     btn.innerHTML = "Send OTP";
     btn.disabled = false;
   });
@@ -245,6 +248,7 @@ function verifyOTP(){
 
       document.getElementById("registerBtn").disabled = false;
       document.getElementById("email").readOnly = true;
+      document.getElementById("otp").disabled = true;
 
     } else {
       showMessage("Wrong OTP ❌", "red");
