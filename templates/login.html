@@ -55,8 +55,8 @@ input {
 }
 
 input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(46,204,113,0.2);
 }
 button {
   transition: all 0.2s ease;
@@ -79,6 +79,52 @@ button:hover {
     opacity: 1;
   }
 }
+.lnk a{
+  color:var(--green);
+  text-decoration:none;
+  font-weight:600;
+  position:relative;
+}
+
+.lnk a::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:-2px;
+  width:0;
+  height:2px;
+  background:var(--green);
+  transition:0.3s;
+}
+
+.lnk a:hover::after{
+  width:100%;
+}
+.forgot-link{
+  font-size:0.8rem;
+  color:var(--green);
+  text-decoration:none;
+  position:relative;
+}
+
+.forgot-link::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:-2px;
+  width:0;
+  height:2px;
+  background:var(--green);
+  transition:0.3s;
+}
+
+.forgot-link:hover::after{
+  width:100%;
+}
+.card:hover{
+  transform: translateY(-2px);
+  transition: 0.3s;
+}
 </style>
 </head>
 <body>
@@ -97,6 +143,9 @@ button:hover {
         <div class="ale ale-{{cat}}"><span>{% if cat=='error' %}⚠️{% else %}✅{% endif %}</span> {{msg}}</div>
       {% endfor %}
     {% endwith %}
+<p style="font-size:0.75rem; color:#aaa; margin-top:-10px; margin-bottom:20px;">
+  Use your registered email to access your mess dashboard
+</p>
     <form method="POST">
       <div class="fg">
         <label>Email Address</label>
@@ -111,8 +160,13 @@ button:hover {
           <input type="password" name="password" id="pwd" placeholder="••••••••" required>
           <span class="icon" style="cursor:pointer" onclick="togglePwd()">👁</span>
         </div>
+       <div style="text-align:right; margin-top:6px;">
+        <a href="/forgot" class="forgot-link">
+        Forgot Password?
+        </a>
+       </div>
       </div>
-      <button class="btn" type="submit">Sign In →</button>
+      <button class="btn" type="submit">🔐 Sign In →</button>
     </form>
     <div class="divider">or</div>
     <div class="lnk">New student? <a href="/register">Create Account</a></div>
@@ -120,5 +174,12 @@ button:hover {
 </div>
 <script>
 function togglePwd(){const p=document.getElementById('pwd');p.type=p.type==='password'?'text':'password'}
+
+document.querySelector("form").addEventListener("submit", function(){
+  let btn = document.querySelector(".btn");
+  btn.innerHTML = "Signing in...";
+  btn.style.opacity = "0.7";
+  btn.disabled = true;
+});
 </script>
 </body></html>
