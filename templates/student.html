@@ -448,12 +448,9 @@ textarea:focus{border-color:var(--green)}
   {% endwith %} 
 
 <!-- ═══ MONTHLY BILL TAB ═══ -->
-
-
 <div id="tab-bill" class="tab-content">
 
-  <!-- 🔥 INLINE STYLES (NO CSS FILE NEEDED) -->
-  <style>
+<style>
 .bill-card {
   background: #ffffff;
   border-radius: 20px;
@@ -461,11 +458,7 @@ textarea:focus{border-color:var(--green)}
   box-shadow: 0 15px 40px rgba(0,0,0,0.08);
   max-width: 1000px;
   margin: auto;
-  transition: 0.3s;
-}
-
-.bill-card:hover {
-  transform: translateY(-5px);
+  animation: fadeIn 0.4s ease;
 }
 
 .bill-title {
@@ -473,73 +466,9 @@ textarea:focus{border-color:var(--green)}
   font-weight: 700;
   text-align: center;
   color: #1a1a2e;
+  margin-bottom: 10px;
 }
 
-    .bill-total-box {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-.bill-total-box h2 {
-  font-size: 2.5rem;
-  color: #27ae60;
-  letter-spacing: 1px;
-}
-
-    .bill-total-box small {
-      color: #777;
-    }
-
-    .bill-table {
-      width: 100%;
-      border-collapse: collapse;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-.bill-table th {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: #fff;
-  padding: 14px;
-  font-weight: 600;
-}
-
-.bill-table td {
-  padding: 12px;
-  color: #333;
-}
-
-    .bill-table tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-
-.bill-table tr:hover {
-  background: #f5f7fa;
-}
-
-    .date-row {
-      background: #e8f5e9 !important;
-      font-weight: 600;
-      color: #2e7d32;
-    }
-
-    .daily-total {
-      background: #fff3e0;
-      font-weight: 600;
-      color: #ef6c00;
-    }
-
-    .grand-total {
-     background: linear-gradient(135deg, #ff9800, #f57c00); /* orange highlight */
-     color: white;
-     font-size: 1.1rem;
-     font-weight: bold;
-     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-     }
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
 .bill-header {
   display: flex;
   justify-content: space-between;
@@ -547,12 +476,75 @@ textarea:focus{border-color:var(--green)}
   margin-bottom: 15px;
 }
 
-.grand-total td {
-  color:white;
+.bill-total {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #27ae60;
+  margin-bottom: 20px;
 }
-    .amount {
-      font-weight: 700;
-    }
+
+.bill-total span {
+  display: block;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bill-table th {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #fff;
+  padding: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.bill-table td {
+  padding: 12px;
+  color: #333;
+}
+
+.bill-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.bill-table tr:hover {
+  background: #f5f7fa;
+}
+
+.date-row {
+  background: #e8f5e9 !important;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.daily-total {
+  background: #fff3e0;
+  font-weight: 600;
+  color: #ef6c00;
+}
+
+.grand-total {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  font-weight: bold;
+}
+
+.grand-total td {
+  color: white;
+}
+
 .btn-download {
   background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: white;
@@ -561,32 +553,27 @@ textarea:focus{border-color:var(--green)}
   border: none;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 15px;
 }
 
 .btn-download:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(46,204,113,0.3);
 }
-.bill-card {
-  animation: fadeIn 0.4s ease;
-}
-  </style>
+</style>
 
-  <div class="bill-card">
+<div class="bill-card">
 
-    <div class="bill-title">📊 Monthly Bill Details</div>
+  <div class="bill-title">📊 Monthly Bill Details</div>
 
-    {% if u.user_type == 'hosteller' %}
-
-    <!-- 💰 BIG TOTAL -->
-<div class="bill-container">
+  {% if u.user_type == 'hosteller' %}
 
   <!-- HEADER -->
   <div class="bill-header">
-    <h2>📊 Monthly Bill Details</h2>
+    <h3>Monthly Bill</h3>
 
-    <button class="download-btn" onclick="window.location.href='/download_bill'">
+    <!-- ✅ FIXED BUTTON -->
+    <button class="btn-download"
+      onclick="window.location.href='/download_bill'">
       📄 Download PDF
     </button>
   </div>
@@ -600,52 +587,77 @@ textarea:focus{border-color:var(--green)}
   <!-- TABLE -->
   <div class="table-wrapper">
     <table class="bill-table">
-      <tr>
-        <th>Date</th>
-        <th>Meal</th>
-        <th>Cost</th>
-      </tr>
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Meal</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+
+      <tbody>
 
       {% for date, data in attendance.items() %}
 
-      <tr class="date-row">
-        <td colspan="3">📅 {{ date }}</td>
-      </tr>
+        <!-- DATE -->
+        <tr class="date-row">
+          <td colspan="3">📅 {{ date }}</td>
+        </tr>
 
-      {% for a in data['items'] %}
-      <tr>
-        <td></td>
-        <td>{{ a.meal_type.capitalize() }}</td>
-        <td>₹{{ '%.2f'|format(a.cost_charged) }}</td>
-      </tr>
+        <!-- MEALS -->
+        {% for a in data['items'] %}
+        <tr>
+          <td></td>
+          <td>
+            {% if a.meal_type == 'breakfast' %}🌅{% endif %}
+            {% if a.meal_type == 'lunch' %}☀️{% endif %}
+            {% if a.meal_type == 'snacks' %}🫖{% endif %}
+            {% if a.meal_type == 'dinner' %}🌙{% endif %}
+            {{ a.meal_type.capitalize() }}
+          </td>
+          <td>₹{{ '%.2f'|format(a.cost_charged) }}</td>
+        </tr>
+        {% endfor %}
+
+        <!-- DAILY TOTAL -->
+        <tr class="daily-total">
+          <td colspan="2">🍽 Daily Total</td>
+          <td>₹{{ data.total }}</td>
+        </tr>
+
       {% endfor %}
 
-      <tr class="daily-total">
-        <td colspan="2">Daily Total</td>
-        <td>₹{{ data.total }}</td>
-      </tr>
-
-      {% endfor %}
-
+      <!-- GRAND TOTAL -->
       <tr class="grand-total">
-        <td colspan="2">Grand Total</td>
+        <td colspan="2">💰 Grand Total</td>
         <td>₹{{ grand_total }}</td>
       </tr>
+
+      </tbody>
 
     </table>
   </div>
 
+  {% else %}
+    <p style="text-align:center;color:gray;margin-top:20px;">
+      This feature is only for hostellers.
+    </p>
+  {% endif %}
+
 </div>
+</div>
+
     <!-- ═══ HOME TAB ═══ -->
     <div id="tab-home" class="tab-content active">
       <div class="stats">
         <div class="stat green">
           <div class="stat-label">
-	{% if u.user_type == 'dayscholar' %}
-  	Mess Balance
-	{% else %}
- 	 Monthly Bill
-	{% endif %}
+{% if u.user_type == 'dayscholar' %}
+  💳 Balance: ₹{{ '%.0f'|format(u.mess_balance) }}
+{% else %}
+  🏨 Monthly Bill: ₹{{ grand_total }}
+{% endif %}
 	</div>
           <div class="stat-val" id="live-balance">{% if u.user_type == 'dayscholar' %}
   ₹{{ '%.0f'|format(u.mess_balance) }}
