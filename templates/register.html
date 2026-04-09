@@ -189,6 +189,19 @@ function showMessage(text, color){
   }, 3000);
 }
 
+function showMessage(text, color){
+  let box = document.getElementById("msgBox");
+
+  box.style.display = "block";
+  box.style.background = color;
+  box.style.color = "white";
+  box.innerHTML = text;
+
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 3000);
+}
+
 function sendOTP(){
   let email = document.getElementById("email").value;
   let btn = document.getElementById("sendBtn");
@@ -211,13 +224,17 @@ function sendOTP(){
   .then(res => res.json())
   .then(d=>{
     if(d.success){
-      showMessage("OTP sent to your email 📩", "green");
+      showMessage("OTP sent successfully! Check your inbox 📩", "green");
     } else {
-      showMessage(d.message || "Failed to send OTP ❌", "red");
+      showMessage("Failed to send OTP ❌", "red");
     }
 
     btn.innerHTML = "Resend OTP";
-    btn.disabled = false;
+
+    // ⏳ prevent spam
+    setTimeout(() => {
+      btn.disabled = false;
+    }, 30000);
   })
   .catch(()=>{
     showMessage("Server Error ❌", "red");
@@ -251,11 +268,8 @@ function verifyOTP(){
       document.getElementById("otp").disabled = true;
 
     } else {
-      showMessage("Wrong OTP ❌", "red");
+      showMessage(d.message || "Wrong OTP ❌", "red");
     }
-  })
-  .catch(()=>{
-    showMessage("Server Error ❌", "red");
   });
 }
 </script>

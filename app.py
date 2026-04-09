@@ -57,7 +57,6 @@ def is_past_cutoff(cutoff_time):
         return False
 
 def send_otp_email(to_email, otp):
-
     api_key = os.getenv("BREVO_API_KEY")
 
     url = "https://api.brevo.com/v3/smtp/email"
@@ -71,28 +70,24 @@ def send_otp_email(to_email, otp):
     data = {
         "sender": {
             "name": "FeedSmart",
-            "email": "sathvikheree@gmail.com"   # 👈 your email here
+            "email": "sathvikheree@gmail.com"   # 👈 CHANGE THIS
         },
         "to": [
-            {
-                "email": to_email
-            }
+            {"email": to_email}
         ],
         "subject": "FeedSmart OTP Verification",
         "htmlContent": f"""
-            <h2>Your OTP Code</h2>
-            <p>Your FeedSmart OTP is:</p>
-            <h1>{otp}</h1>
-            <p>This OTP is valid for few minutes.</p>
+            <h2>FeedSmart Verification</h2>
+            <p>Your OTP is:</p>
+            <h1 style="color:green;">{otp}</h1>
+            <p>This OTP is valid for 5 minutes.</p>
         """
     }
 
     try:
         response = requests.post(url, json=data, headers=headers)
         print("BREVO STATUS:", response.status_code, response.text)
-
         return response.status_code == 201
-
     except Exception as e:
         print("BREVO ERROR:", e)
         return False
@@ -914,20 +909,26 @@ def send_otp():
 
     otp = str(random.randint(100000, 999999))
 
+    # store in session
     session['otp'] = otp
     session['otp_verified'] = False
     session['otp_email'] = email
+    session['otp_time'] = datetime.now()
 
     success = send_otp_email(email, otp)
 
-    if success:
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False})
+    return jsonify({'success': success})
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
+
+    if not session.get('otp'):
+        return jsonify({'success': False})
+
+    # ⏳ Expiry check (5 mins)
+    if datetime.now() - session['otp_time'] > timedelta(minutes=5):
+        return jsonify({'success': False, 'message': 'OTP expired'})
 
     if user_otp == session.get('otp'):
         session['otp_verified'] = True
