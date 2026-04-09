@@ -882,24 +882,25 @@ def delete_student():
 
     return redirect(url_for('admin_dash'))
 
-@app.route('/send_otp', methods=['POST'])
-def send_otp():
-    email = request.form.get('email')
+def send_otp_email(to_email, otp):
+    api_key = os.getenv("MAILGUN_API_KEY")
+    domain = os.getenv("MAILGUN_DOMAIN")
 
-    if not email:
-        return jsonify({'error': 'Email required'}), 400
+    response = requests.post(
+        f"https://api.mailgun.net/v3/{domain}/messages",
+        auth=("api", api_key),
+        data={
+            "from": f"FeedSmart <postmaster@{domain}>",
+            "to": [to_email],
+            "subject": "Your OTP Code",
+            "text": f"Your FeedSmart OTP is: {otp}"
+        }
+    )
 
-    otp = str(random.randint(100000, 999999))
+    print("MAIL STATUS:", response.status_code)
+    print("MAIL RESPONSE:", response.text)
 
-    # store in session
-    session['otp'] = otp
-    session['otp_email'] = email
-
-    try:
-        send_otp_email(email, otp)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return response
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
