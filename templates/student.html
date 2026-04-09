@@ -458,17 +458,9 @@ textarea:focus{border-color:var(--green)}
   box-shadow: 0 15px 40px rgba(0,0,0,0.08);
   max-width: 1000px;
   margin: auto;
-  animation: fadeIn 0.4s ease;
 }
 
-.bill-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: center;
-  color: #1a1a2e;
-  margin-bottom: 10px;
-}
-
+/* HEADER */
 .bill-header {
   display: flex;
   justify-content: space-between;
@@ -476,22 +468,30 @@ textarea:focus{border-color:var(--green)}
   margin-bottom: 15px;
 }
 
+.bill-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* DROPDOWN */
+.month-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-weight: 600;
+}
+
+/* TOTAL */
 .bill-total {
   text-align: center;
   font-size: 2.5rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #27ae60;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.bill-total span {
-  display: block;
-  font-size: 0.9rem;
-  color: #777;
-}
-
+/* TABLE */
 .table-wrapper {
-  width: 100%;
   overflow-x: auto;
 }
 
@@ -504,155 +504,125 @@ textarea:focus{border-color:var(--green)}
 
 .bill-table th {
   background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: #fff;
-  padding: 14px;
-  font-weight: 600;
-  text-align: left;
+  color: white;
+  padding: 12px;
 }
 
 .bill-table td {
-  padding: 12px;
-  color: #333;
-}
-
-.bill-table tr:nth-child(even) {
-  background: #f9f9f9;
-}
-
-.bill-table tr:hover {
-  background: #f5f7fa;
+  padding: 10px;
 }
 
 .date-row {
-  background: #e8f5e9 !important;
+  background: #e8f5e9;
   font-weight: 600;
-  color: #2e7d32;
 }
 
 .daily-total {
   background: #fff3e0;
   font-weight: 600;
-  color: #ef6c00;
 }
 
+/* 🔥 FIXED GRAND TOTAL (VISIBLE NOW) */
 .grand-total {
-  background: linear-gradient(135deg, #ff7a00, #ff3d00);
-  color: white;
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: #ffffff !important;
   font-weight: bold;
-  font-size: 1.05rem;
 }
 
 .grand-total td {
-  color: white;
+  color: #ffffff !important;
   font-weight: 700;
-}
-.grand-total {
-  border-top: 2px solid #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* 🔥 makes text visible */
 }
 
-.btn-download {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+/* BUTTON */
+.download-btn {
+  background: #27ae60;
   color: white;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
   border: none;
-  font-weight: 600;
   cursor: pointer;
-}
-
-.btn-download:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(46,204,113,0.3);
 }
 </style>
 
+
 <div class="bill-card">
-
-  <div class="bill-title">📊 Monthly Bill Details</div>
-
-  {% if u.user_type == 'hosteller' %}
 
   <!-- HEADER -->
   <div class="bill-header">
-    <h3>Monthly Bill</h3>
 
-    <!-- ✅ FIXED BUTTON -->
-    <button class="btn-download"
-      onclick="window.location.href='/download_bill'">
+    <div class="bill-title">📊 Monthly Bill</div>
+
+    <!-- 🔥 MONTH DROPDOWN -->
+    <select class="month-select" onchange="changeMonth(this.value)">
+      <option value="2026-04" {% if selected_month_value=='2026-04' %}selected{% endif %}>April 2026</option>
+      <option value="2026-03" {% if selected_month_value=='2026-03' %}selected{% endif %}>March 2026</option>
+    </select>
+
+    <!-- DOWNLOAD -->
+    <button class="download-btn"
+      onclick="window.location.href='/download_bill?month={{ selected_month_value }}'">
       📄 Download PDF
     </button>
+
   </div>
 
   <!-- TOTAL -->
   <div class="bill-total">
     ₹{{ grand_total }}
-    <span>This Month</span>
+    <div style="font-size:14px;color:#777">{{ selected_month }}</div>
   </div>
 
   <!-- TABLE -->
   <div class="table-wrapper">
     <table class="bill-table">
 
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Meal</th>
-          <th>Cost</th>
-        </tr>
-      </thead>
-
-      <tbody>
+      <tr>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Cost</th>
+      </tr>
 
       {% for date, data in attendance.items() %}
 
-        <!-- DATE -->
-        <tr class="date-row">
-          <td colspan="3">📅 {{ date }}</td>
-        </tr>
+      <tr class="date-row">
+        <td colspan="3">📅 {{ date }}</td>
+      </tr>
 
-        <!-- MEALS -->
-        {% for a in data['items'] %}
-        <tr>
-          <td></td>
-          <td>
-            {% if a.meal_type == 'breakfast' %}🌅{% endif %}
-            {% if a.meal_type == 'lunch' %}☀️{% endif %}
-            {% if a.meal_type == 'snacks' %}🫖{% endif %}
-            {% if a.meal_type == 'dinner' %}🌙{% endif %}
-            {{ a.meal_type.capitalize() }}
-          </td>
-          <td>₹{{ '%.2f'|format(a.cost_charged) }}</td>
-        </tr>
-        {% endfor %}
+      {% for a in data['items'] %}
+      <tr>
+        <td></td>
+        <td>{{ a.meal_type.capitalize() }}</td>
+        <td>₹{{ '%.2f'|format(a.cost_charged) }}</td>
+      </tr>
+      {% endfor %}
 
-        <!-- DAILY TOTAL -->
-        <tr class="daily-total">
-          <td colspan="2">🍽 Daily Total</td>
-          <td>₹{{ data.total }}</td>
-        </tr>
+      <tr class="daily-total">
+        <td colspan="2">Daily Total</td>
+        <td>₹{{ data.total }}</td>
+      </tr>
 
       {% endfor %}
 
-      <!-- GRAND TOTAL -->
+      <!-- 🔥 GRAND TOTAL -->
       <tr class="grand-total">
-        <td colspan="2">💰 Grand Total</td>
+        <td colspan="2">Grand Total</td>
         <td>₹{{ grand_total }}</td>
       </tr>
-
-      </tbody>
 
     </table>
   </div>
 
-  {% else %}
-    <p style="text-align:center;color:gray;margin-top:20px;">
-      This feature is only for hostellers.
-    </p>
-  {% endif %}
-
-</div>
 </div>
 
+<script>
+function changeMonth(month){
+  window.location.href = "/student?month=" + month;
+}
+</script>
+
+</div>
     <!-- ═══ HOME TAB ═══ -->
     <div id="tab-home" class="tab-content active">
       <div class="stats">

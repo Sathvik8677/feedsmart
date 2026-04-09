@@ -382,10 +382,12 @@ def student_dash():
 
     conn = db()
 
+    # ───────────────────────── CONFIG ─────────────────────────
     configs     = qr(conn, "SELECT * FROM mess_config WHERE enabled=1 ORDER BY start_time")
     meal_order  = [c['meal_type'] for c in configs]
     config_dict = {c['meal_type']: c for c in configs}
 
+    # ───────────────────────── MENU ─────────────────────────
     menu_rows  = qr(conn, "SELECT * FROM menu WHERE date=%s", (today,))
     today_menu = {r['meal_type']: r for r in menu_rows}
 
@@ -396,16 +398,19 @@ def student_dash():
         if rows:
             weekly[d] = {r['meal_type']: r for r in rows}
 
+    # ───────────────────────── OPT-IN ─────────────────────────
     optin_rows = qr(conn, "SELECT * FROM opt_ins WHERE user_id=%s AND date>=%s", (u['id'], today))
     optins = {(str(o['date']), o['meal_type']): o['status'] for o in optin_rows}
 
     tmr_rows   = qr(conn, "SELECT meal_type, COUNT(*) as cnt FROM opt_ins WHERE date=%s AND status='in' GROUP BY meal_type", (tomorrow,))
     tmr_counts = {r['meal_type']: r['cnt'] for r in tmr_rows}
 
+    # ───────────────────────── ATTENDANCE TODAY ─────────────────────────
     att_rows  = qr(conn, "SELECT meal_type FROM attendance WHERE user_id=%s AND date=%s", (u['id'], today))
     att_today = {a['meal_type'].lower() for a in att_rows}
     att_count = len(att_today)
 
+    # ───────────────────────── MISSED MEALS ─────────────────────────
     missed = []
     for mt in meal_order:
         if mt not in att_today and mt in config_dict:
@@ -418,15 +423,25 @@ def student_dash():
             except:
                 pass
 
+    # ───────────────────────── EXTRA DATA ─────────────────────────
     my_fb = qr(conn, "SELECT * FROM feedback WHERE user_id=%s ORDER BY created_at DESC LIMIT 6", (u['id'],))
     anns  = qr(conn, "SELECT * FROM announcements ORDER BY created_at DESC LIMIT 5")
     txns  = qr(conn, "SELECT * FROM transactions WHERE user_id=%s ORDER BY created_at DESC LIMIT 8", (u['id'],))
     pays  = qr(conn, "SELECT * FROM payments WHERE user_id=%s ORDER BY created_at DESC LIMIT 5", (u['id'],))
 
-    # 🔥 MONTH FILTER
-    current_month = now.month
-    current_year  = now.year
+    # ───────────────────────── 🔥 MONTH FILTER ─────────────────────────
+    month_param = request.args.get('month')
 
+    if month_param:
+        selected_date = datetime.strptime(month_param, "%Y-%m")
+    else:
+        selected_date = datetime.now()
+
+    selected_month = selected_date.month
+    selected_year  = selected_date.year
+    selected_month_str = selected_date.strftime("%B %Y")
+
+    # ───────────────────────── ATTENDANCE ALL ─────────────────────────
     attendance_raw = qr(conn, """
         SELECT DATE_FORMAT(date, '%Y-%m-%d') as date,
                LOWER(meal_type) as meal_type,
@@ -443,8 +458,8 @@ def student_dash():
     for a in attendance_raw:
         dt = datetime.strptime(a['date'], "%Y-%m-%d")
 
-        # ✅ FILTER ONLY CURRENT MONTH
-        if dt.month != current_month or dt.year != current_year:
+        # ✅ FILTER BY SELECTED MONTH
+        if dt.month != selected_month or dt.year != selected_year:
             continue
 
         d = a['date']
@@ -464,27 +479,55 @@ def student_dash():
 
     return render_template('student.html',
         att_count=att_count,
-        u=u, today=today, tomorrow=tomorrow, now=now,
+        u=u,
+        today=today,
+        tomorrow=tomorrow,
+        now=now,
         today_str=now.strftime('%A, %d %B %Y'),
-        configs=configs, config_dict=config_dict, meal_order=meal_order,
-        today_menu=today_menu, weekly=weekly,
-        optins=optins, tmr_counts=tmr_counts,
-        att_today=att_today, missed=missed,
-        my_fb=my_fb, anns=anns, txns=txns, pays=pays,
+
+        configs=configs,
+        config_dict=config_dict,
+        meal_order=meal_order,
+
+        today_menu=today_menu,
+        weekly=weekly,
+
+        optins=optins,
+        tmr_counts=tmr_counts,
+
+        att_today=att_today,
+        missed=missed,
+
+        my_fb=my_fb,
+        anns=anns,
+        txns=txns,
+        pays=pays,
+
         attendance=attendance,
         grand_total=grand_total,
+
+        selected_month=selected_month_str,   # 🔥 IMPORTANT
+        selected_month_value=selected_date.strftime("%Y-%m"),  # 🔥 for dropdown
+
         is_past_cutoff=is_past_cutoff
     )
-
 @app.route('/download_bill')
 def download_bill():
     u = cu()
     if not u or u['role'] != 'student':
         return redirect(url_for('login'))
 
-    now = datetime.now()
-    current_month = now.month
-    current_year  = now.year
+    # 🔥 GET MONTH FROM URL (IMPORTANT FIX)
+    month_param = request.args.get('month')
+
+    if month_param:
+        selected_date = datetime.strptime(month_param, "%Y-%m")
+    else:
+        selected_date = datetime.now()
+
+    selected_month = selected_date.month
+    selected_year  = selected_date.year
+    selected_month_str = selected_date.strftime("%B %Y")
 
     conn = db()
 
@@ -499,31 +542,41 @@ def download_bill():
 
     conn.close()
 
+    # 📄 CREATE PDF
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
 
     styles = getSampleStyleSheet()
     elements = []
 
+    # 🔥 HEADER
     elements.append(Paragraph("FeedSmart Monthly Bill", styles['Title']))
+    elements.append(Paragraph(f"Month: {selected_month_str}", styles['Normal']))
     elements.append(Paragraph(f"Name: {u['name']}", styles['Normal']))
     elements.append(Paragraph(f"Roll No: {u['roll_no']}", styles['Normal']))
     elements.append(Paragraph(" ", styles['Normal']))
 
+    # 📊 TABLE
     data = [["Date", "Meal", "Cost"]]
     total = 0
 
     for r in rows:
         dt = datetime.strptime(r['date'], "%Y-%m-%d")
 
-        # ✅ FILTER MONTH HERE ALSO
-        if dt.month != current_month or dt.year != current_year:
+        # ✅ FILTER SELECTED MONTH (FIXED)
+        if dt.month != selected_month or dt.year != selected_year:
             continue
 
-        data.append([r['date'], r['meal_type'], f"₹{r['cost_charged']}"])
+        data.append([
+            r['date'],
+            r['meal_type'].capitalize(),
+            f"₹{float(r['cost_charged']):.2f}"
+        ])
+
         total += float(r['cost_charged'])
 
-    data.append(["", "Total", f"₹{total}"])
+    # 🔥 TOTAL ROW
+    data.append(["", "Total", f"₹{total:.2f}"])
 
     table = Table(data)
 
@@ -531,7 +584,10 @@ def download_bill():
         ('BACKGROUND', (0,0), (-1,0), colors.green),
         ('TEXTCOLOR',(0,0),(-1,0),colors.white),
         ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('BACKGROUND', (-1,-1), (-1,-1), colors.lightgrey)
+
+        # 🔥 TOTAL STYLE
+        ('BACKGROUND', (-1,-1), (-1,-1), colors.lightgrey),
+        ('FONTNAME', (-1,-1), (-1,-1), 'Helvetica-Bold')
     ]))
 
     elements.append(table)
@@ -539,11 +595,12 @@ def download_bill():
     doc.build(elements)
     buffer.seek(0)
 
-    return send_file(buffer,
-                     as_attachment=True,
-                     download_name="monthly_bill.pdf",
-                     mimetype='application/pdf')
-
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"monthly_bill_{selected_date.strftime('%Y_%m')}.pdf",
+        mimetype='application/pdf'
+    )
 
 @app.route('/optin', methods=['POST'])
 def optin():
