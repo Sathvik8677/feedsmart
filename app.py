@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 import mysql.connector
-from dotenv import load_dotenv
 import hashlib, json, os, uuid
-import smtplib, random
+import random
 import requests
 from datetime import datetime, date, timedelta
-from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = 'feedsmart_v3_ultra_2026'
@@ -59,31 +57,31 @@ def is_past_cutoff(cutoff_time):
         return False
 
 def send_otp_email(to_email, otp):
-    import smtplib
-    from email.mime.text import MIMEText
+    import requests
     import os
 
-    smtp_user = os.getenv("MAILGUN_SMTP_USER")
-    smtp_pass = os.getenv("MAILGUN_SMTP_PASS")
-
-    print("SMTP USER:", smtp_user)   # 🔥 debug
-    print("SMTP PASS:", smtp_pass)
-
-    msg = MIMEText(f"Your FeedSmart OTP is: {otp}")
-    msg['Subject'] = "FeedSmart OTP"
-    msg['From'] = smtp_user
-    msg['To'] = to_email
+    api_key = os.getenv("MAILGUN_API_KEY")
+    domain = os.getenv("MAILGUN_DOMAIN")
 
     try:
-        server = smtplib.SMTP("smtp.mailgun.org", 587)
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
-        server.quit()
-        print("MAIL SENT SUCCESS ✅")
-        return True
+        response = requests.post(
+            f"https://api.mailgun.net/v3/{domain}/messages",
+            auth=("api", api_key),
+            data={
+                "from": f"FeedSmart <mailgun@{domain}>",
+                "to": [to_email],
+                "subject": "FeedSmart OTP",
+                "text": f"Your OTP is: {otp}"
+            }
+        )
+
+        print("MAIL STATUS:", response.status_code)
+        print("MAIL RESPONSE:", response.text)
+
+        return response.status_code == 200
+
     except Exception as e:
-        print("MAIL ERROR ❌:", e)
+        print("MAIL ERROR:", e)
         return False
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
@@ -898,16 +896,21 @@ def delete_student():
 def send_otp():
     email = request.form.get('email')
 
+    if not email:
+        return jsonify({'success': False, 'message': 'Email required'})
+
     otp = str(random.randint(100000, 999999))
 
     session['otp'] = otp
     session['otp_email'] = email
+    session['otp_verified'] = False
 
     success = send_otp_email(email, otp)
 
-    return jsonify({
-        'success': success
-    })
+    if success:
+        return jsonify({'success': True, 'message': 'OTP sent'})
+    else:
+        return jsonify({'success': False, 'message': 'Mail failed'})
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():

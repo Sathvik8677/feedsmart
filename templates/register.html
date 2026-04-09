@@ -213,7 +213,7 @@ function sendOTP(){
     if(d.success){
       showMessage("OTP sent to your email 📩", "green");
     } else {
-      showMessage("Failed to send OTP ❌", "red");
+      showMessage(d.message || "Failed to send OTP ❌", "red");
     }
 
     btn.innerHTML = "Resend OTP";
@@ -253,6 +253,9 @@ function verifyOTP(){
     } else {
       showMessage("Wrong OTP ❌", "red");
     }
+  })
+  .catch(()=>{
+    showMessage("Server Error ❌", "red");
   });
 }
 </script>
