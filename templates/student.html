@@ -459,7 +459,7 @@ textarea:focus{border-color:var(--green)}
   border-radius: 20px;
   padding: 25px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-  max-width: 750px;
+  max-width: 1000px;
   margin: auto;
   transition: 0.3s;
 }
@@ -536,6 +536,16 @@ textarea:focus{border-color:var(--green)}
      font-weight: bold;
      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
      }
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+.bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
 
 .grand-total td {
   color:white;
@@ -558,6 +568,9 @@ textarea:focus{border-color:var(--green)}
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(46,204,113,0.3);
 }
+.bill-card {
+  animation: fadeIn 0.4s ease;
+}
   </style>
 
   <div class="bill-card">
@@ -567,14 +580,25 @@ textarea:focus{border-color:var(--green)}
     {% if u.user_type == 'hosteller' %}
 
     <!-- 💰 BIG TOTAL -->
-    <div class="bill-total-box">
-      <h2>₹{{ grand_total }}</h2>
-      <small>This Month</small>
-    </div>
-<button onclick="window.location.href='/download_bill'" 
-  📄 Download PDF
-</button>
+<div class="bill-container">
 
+  <!-- HEADER -->
+  <div class="bill-header">
+    <h2>📊 Monthly Bill Details</h2>
+
+    <button class="download-btn" onclick="window.location.href='/download_bill'">
+      📄 Download PDF
+    </button>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="bill-total">
+    ₹{{ grand_total }}
+    <span>This Month</span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
     <table class="bill-table">
       <tr>
         <th>Date</th>
@@ -584,50 +608,33 @@ textarea:focus{border-color:var(--green)}
 
       {% for date, data in attendance.items() %}
 
-      <!-- 📅 DATE -->
       <tr class="date-row">
         <td colspan="3">📅 {{ date }}</td>
       </tr>
 
-      <!-- 🍽 MEALS -->
       {% for a in data['items'] %}
       <tr>
         <td></td>
-        <td>
-          {% if a.meal_type == 'breakfast' %} 🌅 {% endif %}
-          {% if a.meal_type == 'lunch' %} ☀️ {% endif %}
-          {% if a.meal_type == 'snacks' %} 🫖 {% endif %}
-          {% if a.meal_type == 'dinner' %} 🌙 {% endif %}
-          {{ a.meal_type.capitalize() }}
-        </td>
-        <td class="amount">₹{{ '%.2f'|format(a.cost_charged) }}</td>
+        <td>{{ a.meal_type.capitalize() }}</td>
+        <td>₹{{ '%.2f'|format(a.cost_charged) }}</td>
       </tr>
       {% endfor %}
 
-      <!-- 🔥 DAILY TOTAL -->
       <tr class="daily-total">
-        <td colspan="2">🍽 Daily Total</td>
-        <td class="amount">₹{{ data.total }}</td>
+        <td colspan="2">Daily Total</td>
+        <td>₹{{ data.total }}</td>
       </tr>
 
       {% endfor %}
 
-      <!-- 💰 GRAND TOTAL -->
       <tr class="grand-total">
-        <td colspan="2">💰 Grand Total</td>
-        <td class="amount">₹{{ grand_total }}</td>
+        <td colspan="2">Grand Total</td>
+        <td>₹{{ grand_total }}</td>
       </tr>
 
     </table>
-
-    {% else %}
-      <p style="text-align:center;color:gray;">
-        This feature is only for hostellers.
-      </p>
-    {% endif %}
-
   </div>
-</div>
+
 </div>
     <!-- ═══ HOME TAB ═══ -->
     <div id="tab-home" class="tab-content active">
