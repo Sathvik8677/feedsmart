@@ -886,9 +886,11 @@ def send_otp_email(to_email, otp):
     api_key = os.getenv("MAILGUN_API_KEY")
     domain = os.getenv("MAILGUN_DOMAIN")
 
-    response = requests.post(
+    return requests.post(
         f"https://api.mailgun.net/v3/{domain}/messages",
-        auth=("api", api_key),
+        headers={
+            "Authorization": f"Bearer {api_key}"
+        },
         data={
             "from": f"FeedSmart <postmaster@{domain}>",
             "to": [to_email],
@@ -896,11 +898,6 @@ def send_otp_email(to_email, otp):
             "text": f"Your FeedSmart OTP is: {otp}"
         }
     )
-
-    print("STATUS:", response.status_code)
-    print("RESPONSE:", response.text)
-
-    return response
 
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
