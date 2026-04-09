@@ -67,16 +67,25 @@ def send_otp_email(to_email, otp):
     smtp_user = os.getenv("MAILGUN_SMTP_USER")
     smtp_pass = os.getenv("MAILGUN_SMTP_PASS")
 
+    print("SMTP USER:", smtp_user)   # 🔥 debug
+    print("SMTP PASS:", smtp_pass)
+
     msg = MIMEText(f"Your FeedSmart OTP is: {otp}")
     msg['Subject'] = "FeedSmart OTP"
     msg['From'] = smtp_user
     msg['To'] = to_email
 
-    server = smtplib.SMTP("smtp.mailgun.org", 587)
-    server.starttls()
-    server.login(smtp_user, smtp_pass)
-    server.send_message(msg)
-    server.quit()
+    try:
+        server = smtplib.SMTP("smtp.mailgun.org", 587)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+        server.quit()
+        print("MAIL SENT SUCCESS ✅")
+        return True
+    except Exception as e:
+        print("MAIL ERROR ❌:", e)
+        return False
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
 def init_db():
@@ -897,10 +906,9 @@ def send_otp():
 
     success = send_otp_email(email, otp)
 
-    if success:
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False})
+    return jsonify({
+        'success': success
+    })
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
