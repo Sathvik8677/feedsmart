@@ -106,7 +106,7 @@ def init_db():
             password VARCHAR(64) NOT NULL,
             role VARCHAR(20) DEFAULT 'student',
             roll_no VARCHAR(50),
-            phone VARCHAR(20),
+            phone VARCHAR(20) UNIQUE NOT NULL,
             user_type VARCHAR(20) DEFAULT 'dayscholar',
             mess_balance DECIMAL(10,2) DEFAULT 0.00,
             monthly_bill DECIMAL(10,2) DEFAULT 0.00,
@@ -318,6 +318,19 @@ def register():
             existing = q1(conn, "SELECT id FROM users WHERE email=%s", (email,))
             if existing:
                 flash("Email already registered ❌", "error")
+                return redirect(url_for('register'))
+
+            phone = request.form.get('phone')
+
+            # ✅ check 10 digits
+            if not phone or len(phone) != 10 or not phone.isdigit():
+                flash("Phone must be exactly 10 digits ❌", "error")
+                return redirect(url_for('register'))
+
+            # ✅ check duplicate phone
+            existing_phone = q1(conn, "SELECT id FROM users WHERE phone=%s", (phone,))
+            if existing_phone:
+                flash("Phone number already registered ❌", "error")
                 return redirect(url_for('register'))
 
             # ✅ insert
