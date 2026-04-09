@@ -423,30 +423,35 @@ def student_dash():
     txns  = qr(conn, "SELECT * FROM transactions WHERE user_id=%s ORDER BY created_at DESC LIMIT 8", (u['id'],))
     pays  = qr(conn, "SELECT * FROM payments WHERE user_id=%s ORDER BY created_at DESC LIMIT 5", (u['id'],))
 
-    attendance_raw = qr(conn, """
-    SELECT DATE_FORMAT(date, '%Y-%m-%d') as date,
-           LOWER(meal_type) as meal_type,
-           cost_charged
-    FROM attendance 
-    WHERE user_id=%s
-    ORDER BY date ASC,
-    FIELD(LOWER(meal_type), 'breakfast','lunch','snacks','dinner')
-    """, (u['id'],))
+    # 🔥 MONTH FILTER
+    current_month = now.month
+    current_year  = now.year
 
+    attendance_raw = qr(conn, """
+        SELECT DATE_FORMAT(date, '%Y-%m-%d') as date,
+               LOWER(meal_type) as meal_type,
+               cost_charged
+        FROM attendance 
+        WHERE user_id=%s
+        ORDER BY date ASC,
+        FIELD(LOWER(meal_type), 'breakfast','lunch','snacks','dinner')
+    """, (u['id'],))
 
     attendance = {}
     grand_total = 0
 
     for a in attendance_raw:
+        dt = datetime.strptime(a['date'], "%Y-%m-%d")
+
+        # ✅ FILTER ONLY CURRENT MONTH
+        if dt.month != current_month or dt.year != current_year:
+            continue
+
         d = a['date']
 
         if d not in attendance:
-            attendance[d] = {
-                'items': [],
-                'total': 0
-            }
+            attendance[d] = {'items': [], 'total': 0}
 
-    # ✅ NOW INSIDE LOOP (CORRECT)
         attendance[d]['items'].append({
             'meal_type': a['meal_type'],
             'cost_charged': float(a['cost_charged'])
@@ -454,6 +459,8 @@ def student_dash():
 
         attendance[d]['total'] += float(a['cost_charged'])
         grand_total += float(a['cost_charged'])
+
+    conn.close()
 
     return render_template('student.html',
         att_count=att_count,
@@ -466,20 +473,18 @@ def student_dash():
         my_fb=my_fb, anns=anns, txns=txns, pays=pays,
         attendance=attendance,
         grand_total=grand_total,
-        is_past_cutoff=is_past_cutoff   # ← THIS FIXES THE JINJA ERROR
+        is_past_cutoff=is_past_cutoff
     )
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
-from flask import send_file
 
 @app.route('/download_bill')
 def download_bill():
     u = cu()
     if not u or u['role'] != 'student':
         return redirect(url_for('login'))
+
+    now = datetime.now()
+    current_month = now.month
+    current_year  = now.year
 
     conn = db()
 
@@ -494,24 +499,27 @@ def download_bill():
 
     conn.close()
 
-    # 📄 PDF create
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
 
     styles = getSampleStyleSheet()
     elements = []
 
-    # 🔥 HEADER
     elements.append(Paragraph("FeedSmart Monthly Bill", styles['Title']))
     elements.append(Paragraph(f"Name: {u['name']}", styles['Normal']))
     elements.append(Paragraph(f"Roll No: {u['roll_no']}", styles['Normal']))
     elements.append(Paragraph(" ", styles['Normal']))
 
-    # 📊 TABLE
     data = [["Date", "Meal", "Cost"]]
     total = 0
 
     for r in rows:
+        dt = datetime.strptime(r['date'], "%Y-%m-%d")
+
+        # ✅ FILTER MONTH HERE ALSO
+        if dt.month != current_month or dt.year != current_year:
+            continue
+
         data.append([r['date'], r['meal_type'], f"₹{r['cost_charged']}"])
         total += float(r['cost_charged'])
 
