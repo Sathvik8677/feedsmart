@@ -57,31 +57,44 @@ def is_past_cutoff(cutoff_time):
         return False
 
 def send_otp_email(to_email, otp):
-    import requests
-    import os
 
-    api_key = os.getenv("MAILGUN_API_KEY")
-    domain = os.getenv("MAILGUN_DOMAIN")
+    api_key = os.getenv("BREVO_API_KEY")
+
+    url = "https://api.brevo.com/v3/smtp/email"
+
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+
+    data = {
+        "sender": {
+            "name": "FeedSmart",
+            "email": "sathvikheree@gmail.com"   # 👈 your email here
+        },
+        "to": [
+            {
+                "email": to_email
+            }
+        ],
+        "subject": "FeedSmart OTP Verification",
+        "htmlContent": f"""
+            <h2>Your OTP Code</h2>
+            <p>Your FeedSmart OTP is:</p>
+            <h1>{otp}</h1>
+            <p>This OTP is valid for few minutes.</p>
+        """
+    }
 
     try:
-        response = requests.post(
-            f"https://api.mailgun.net/v3/{domain}/messages",
-            auth=("api", api_key),
-            data={
-                "from": f"FeedSmart <mailgun@{domain}>",
-                "to": [to_email],
-                "subject": "FeedSmart OTP",
-                "text": f"Your OTP is: {otp}"
-            }
-        )
+        response = requests.post(url, json=data, headers=headers)
+        print("BREVO STATUS:", response.status_code, response.text)
 
-        print("MAIL STATUS:", response.status_code)
-        print("MAIL RESPONSE:", response.text)
-
-        return response.status_code == 200
+        return response.status_code == 201
 
     except Exception as e:
-        print("MAIL ERROR:", e)
+        print("BREVO ERROR:", e)
         return False
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
@@ -897,20 +910,20 @@ def send_otp():
     email = request.form.get('email')
 
     if not email:
-        return jsonify({'success': False, 'message': 'Email required'})
+        return jsonify({'success': False})
 
     otp = str(random.randint(100000, 999999))
 
     session['otp'] = otp
-    session['otp_email'] = email
     session['otp_verified'] = False
+    session['otp_email'] = email
 
     success = send_otp_email(email, otp)
 
     if success:
-        return jsonify({'success': True, 'message': 'OTP sent'})
+        return jsonify({'success': True})
     else:
-        return jsonify({'success': False, 'message': 'Mail failed'})
+        return jsonify({'success': False})
 
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
