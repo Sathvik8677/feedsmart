@@ -897,8 +897,8 @@ def send_otp_email(to_email, otp):
         }
     )
 
-    print("MAIL STATUS:", response.status_code)
-    print("MAIL RESPONSE:", response.text)
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.text)
 
     return response
 
