@@ -936,6 +936,36 @@ def verify_otp():
     else:
         return jsonify({'success': False})
 
+@app.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        if not email:
+            flash("Enter email ❌", "error")
+            return redirect(url_for('forgot'))
+
+        # check if user exists
+        conn = db()
+        user = q1(conn, "SELECT * FROM users WHERE email=%s", (email,))
+        conn.close()
+
+        if not user:
+            flash("Email not registered ❌", "error")
+            return redirect(url_for('forgot'))
+
+        # generate OTP
+        otp = str(random.randint(100000, 999999))
+        session['reset_otp'] = otp
+        session['reset_email'] = email
+
+        send_otp_email(email, otp)
+
+        flash("OTP sent to email 📩", "success")
+        return redirect(url_for('reset_password'))
+
+    return render_template('forgot.html')
+
 @app.route('/forgot_send_otp', methods=['POST'])
 def forgot_send_otp():
     email = request.form.get('email')
@@ -970,23 +1000,29 @@ def forgot_verify_otp():
 
     return jsonify({'success': False})
 
-@app.route('/reset_password', methods=['POST'])
+@app.route('/reset', methods=['GET', 'POST'])
 def reset_password():
-    if not session.get('reset_verified'):
-        return jsonify({'success': False})
+    if request.method == 'POST':
+        otp = request.form.get('otp')
+        new_password = request.form.get('password')
 
-    new_password = request.form.get('password')
-    email = session.get('reset_email')
+        if otp != session.get('reset_otp'):
+            flash("Wrong OTP ❌", "error")
+            return redirect(url_for('reset_password'))
 
-    conn = db()
-    qx(conn, "UPDATE users SET password=%s WHERE email=%s",
-       (hp(new_password), email))
-    conn.commit()
-    conn.close()
+        conn = db()
+        qx(conn, "UPDATE users SET password=%s WHERE email=%s",
+           (hp(new_password), session.get('reset_email')))
+        conn.commit()
+        conn.close()
 
-    session.clear()
+        session.pop('reset_otp', None)
+        session.pop('reset_email', None)
 
-    return jsonify({'success': True})
+        flash("Password updated ✅", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset.html')
 
 
 init_db()   # ✅ correct
