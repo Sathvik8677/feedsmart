@@ -60,19 +60,23 @@ def is_past_cutoff(cutoff_time):
         return False
 
 def send_otp_email(to_email, otp):
-    api_key = os.getenv("MAILGUN_API_KEY")
-    domain = os.getenv("MAILGUN_DOMAIN")
+    import smtplib
+    from email.mime.text import MIMEText
+    import os
 
-    return requests.post(
-        f"https://api.mailgun.net/v3/{domain}/messages",
-        auth=("api", api_key),
-        data={
-            "from": f"FeedSmart <postmaster@{domain}>",
-            "to": [to_email],
-            "subject": "Your OTP Code",
-            "text": f"Your FeedSmart OTP is: {otp}"
-        }
-    )
+    smtp_user = os.getenv("MAILGUN_SMTP_USER")
+    smtp_pass = os.getenv("MAILGUN_SMTP_PASS")
+
+    msg = MIMEText(f"Your FeedSmart OTP is: {otp}")
+    msg['Subject'] = "FeedSmart OTP"
+    msg['From'] = smtp_user
+    msg['To'] = to_email
+
+    server = smtplib.SMTP("smtp.mailgun.org", 587)
+    server.starttls()
+    server.login(smtp_user, smtp_pass)
+    server.send_message(msg)
+    server.quit()
 
 # ── INIT DB ──────────────────────────────────────────────────────────────────
 def init_db():
@@ -882,41 +886,18 @@ def delete_student():
 
     return redirect(url_for('admin_dash'))
 
-def send_otp_email(to_email, otp):
-    api_key = os.getenv("MAILGUN_API_KEY")
-    domain = os.getenv("MAILGUN_DOMAIN")
-
-    return requests.post(
-        f"https://api.mailgun.net/v3/{domain}/messages",
-        headers={
-            "Authorization": f"Bearer {api_key}"
-        },
-        data={
-            "from": f"FeedSmart <postmaster@{domain}>",
-            "to": [to_email],
-            "subject": "Your OTP Code",
-            "text": f"Your FeedSmart OTP is: {otp}"
-        }
-    )
-
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
     email = request.form.get('email')
-
-    if not email:
-        return jsonify({'success': False})
 
     otp = str(random.randint(100000, 999999))
 
     session['otp'] = otp
     session['otp_email'] = email
 
-    response = send_otp_email(email, otp)
+    success = send_otp_email(email, otp)
 
-    print("MAIL STATUS:", response.status_code)
-    print("MAIL RESPONSE:", response.text)
-
-    if response.status_code == 200:
+    if success:
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
