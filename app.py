@@ -902,6 +902,28 @@ def send_otp_email(to_email, otp):
 
     return response
 
+@app.route('/send_otp', methods=['POST'])
+def send_otp():
+    email = request.form.get('email')
+
+    if not email:
+        return jsonify({'success': False})
+
+    otp = str(random.randint(100000, 999999))
+
+    session['otp'] = otp
+    session['otp_email'] = email
+
+    response = send_otp_email(email, otp)
+
+    print("MAIL STATUS:", response.status_code)
+    print("MAIL RESPONSE:", response.text)
+
+    if response.status_code == 200:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False})
+
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     user_otp = request.form.get('otp')
