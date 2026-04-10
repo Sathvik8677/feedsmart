@@ -216,6 +216,12 @@ function sendOTP(){
     return;
   }
 
+  // 🔥 RESET UI
+  document.getElementById("otp").disabled = false;
+  document.getElementById("otp").value = "";
+  document.getElementById("registerBtn").disabled = true;
+  document.getElementById("email").readOnly = false;
+
   btn.innerHTML = "Sending...";
   btn.disabled = true;
 
@@ -229,14 +235,13 @@ function sendOTP(){
   .then(res => res.json())
   .then(d=>{
     if(d.success){
-      showMessage("OTP sent successfully! Check your inbox 📩", "green");
+      showMessage("OTP sent successfully! 📩", "green");
     } else {
       showMessage("Failed to send OTP ❌", "red");
     }
 
     btn.innerHTML = "Resend OTP";
 
-    // ⏳ prevent spam
     setTimeout(() => {
       btn.disabled = false;
     }, 30000);
@@ -247,7 +252,6 @@ function sendOTP(){
     btn.disabled = false;
   });
 }
-
 function verifyOTP(){
   let otp = document.getElementById("otp").value;
 
@@ -310,6 +314,8 @@ function checkMatch(){
   let msg = document.getElementById("matchText");
   let btn = document.getElementById("registerBtn");
 
+  let otpVerified = document.getElementById("otp").disabled === true;
+
   if(confirm === ""){
     msg.innerHTML = "";
     btn.disabled = true;
@@ -320,11 +326,9 @@ function checkMatch(){
     msg.innerHTML = "Passwords match ✅";
     msg.style.color = "green";
 
-    // ✅ ONLY ENABLE IF OTP VERIFIED
-    if(sessionStorage.getItem("otpVerified") === "true"){
-        btn.disabled = false;
-    } else {
-        btn.disabled = true;
+    // ✅ ENABLE ONLY IF OTP ALSO VERIFIED
+    if(otpVerified){
+      btn.disabled = false;
     }
 
   } else {
@@ -332,8 +336,7 @@ function checkMatch(){
     msg.style.color = "red";
     btn.disabled = true;
   }
-}
-document.getElementById("phone").addEventListener("input", function(){
+}document.getElementById("phone").addEventListener("input", function(){
   let val = this.value;
   let msg = document.getElementById("phoneMsg");
 
