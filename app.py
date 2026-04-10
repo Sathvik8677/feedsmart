@@ -369,6 +369,63 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/send_otp', methods=['POST'])
+def send_otp():
+    email = request.form.get('email')
+
+    if not email:
+        return jsonify({'success': False, 'message': 'Email required'})
+
+    # 🔐 generate OTP
+    otp = random.randint(100000, 999999)
+
+    # 💾 store in session
+    session['otp'] = str(otp)
+    session['otp_email'] = email
+    session['otp_verified'] = False
+    session['otp_time'] = datetime.now().timestamp()   # ⏱ expiry timer
+
+    print("OTP GENERATED:", otp)
+
+    # 📩 send email
+    if send_otp_email(email, otp):
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'message': 'Failed to send OTP'})
+
+@app.route('/verify_otp', methods=['POST'])
+def verify_otp():
+    user_otp = request.form.get('otp')
+
+    stored_otp = session.get('otp')
+    otp_time = session.get('otp_time')
+
+    print("ENTERED OTP:", user_otp)
+    print("SESSION OTP:", stored_otp)
+
+    # ❌ no OTP in session
+    if not stored_otp:
+        return jsonify({'success': False, 'message': 'No OTP found. Please resend.'})
+
+    # ⏳ expiry check (5 minutes)
+    if otp_time and (datetime.now().timestamp() - otp_time > 300):
+        session.pop('otp', None)
+        session.pop('otp_time', None)
+        return jsonify({'success': False, 'message': 'OTP expired. Please resend.'})
+
+    # ✅ correct OTP
+    if str(user_otp) == str(stored_otp):
+        session['otp_verified'] = True
+
+        # 🔐 remove OTP after success
+        session.pop('otp', None)
+        session.pop('otp_time', None)
+
+        return jsonify({'success': True})
+
+    # ❌ wrong OTP
+    return jsonify({'success': False, 'message': 'Invalid OTP'})
+
 @app.route('/logout')
 def logout():
     session.clear()

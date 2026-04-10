@@ -49,7 +49,7 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--dark);d
 
 /* STATS ROW */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow-y:auto;transition:transform .2s,box-shadow .2s}
 .stat:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .stat::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.08;transform:translate(20px,-20px)}
 .stat.green::before{background:var(--green)}
@@ -71,7 +71,7 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--dark);d
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px}
 
 /* MEAL CARDS */
-.meal-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:18px;transition:all .25s;position:relative;overflow:hidden}
+.meal-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:18px;transition:all .25s;position:relative;overflow-y:auto}
 .meal-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(46,204,113,.1)}
 .meal-card.attended{border-color:var(--green);background:rgba(46,204,113,.03)}
 .meal-card.missed-meal{border-color:var(--red);background:rgba(231,76,60,.03)}
